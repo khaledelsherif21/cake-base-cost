@@ -1,0 +1,2353 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#1a1a1a">
+<title>حاسبة قواعد الكارتون · v3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=IBM+Plex+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f4f1ea;
+  --paper:#fbfaf6;
+  --ink:#1a1a1a;
+  --muted:#6b6b6b;
+  --line:#dcd6c8;
+  --gold:#b8893a;
+  --gold-soft:#e9d6a8;
+  --gold-light:#f5e8c5;
+  --accent:#1a3a5c;
+  --danger:#9c3a2a;
+  --green:#2d5a3d;
+  --warning:#c87a1a;
+  --shadow: 0 1px 0 rgba(0,0,0,.04), 0 8px 24px -12px rgba(0,0,0,.12);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--ink);line-height:1.55;font-size:14px}
+body{
+  background-image:
+    radial-gradient(circle at 20% 0%, rgba(184,137,58,.06) 0%, transparent 50%),
+    radial-gradient(circle at 80% 100%, rgba(26,58,92,.05) 0%, transparent 50%);
+  min-height:100vh;
+  padding:20px 14px 60px;
+  padding-left: max(14px, env(safe-area-inset-left));
+  padding-right: max(14px, env(safe-area-inset-right));
+  padding-bottom: max(60px, env(safe-area-inset-bottom));
+  -webkit-text-size-adjust: 100%;
+}
+.mono{font-family:'IBM Plex Mono',monospace;direction:ltr;display:inline-block}
+
+/* HEADER */
+.header{
+  max-width:1400px;margin:0 auto 24px;
+  display:flex;align-items:flex-end;justify-content:space-between;
+  border-bottom:2px solid var(--ink);padding-bottom:14px;flex-wrap:wrap;gap:14px;
+}
+.brand h1{
+  font-size:clamp(22px,3.5vw,32px);font-weight:900;letter-spacing:-0.02em;line-height:1.1;
+}
+.brand h1 span{color:var(--gold)}
+.brand p{color:var(--muted);font-size:13px;margin-top:3px}
+.header-meta{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);
+  text-align:left;direction:ltr;
+}
+.header-meta b{color:var(--gold);font-weight:700}
+
+/* MAIN TABS */
+.main-tabs{
+  max-width:1400px;margin:0 auto 18px;
+  display:flex;gap:0;border-bottom:1px solid var(--line);overflow-x:auto;
+}
+.main-tab{
+  padding:11px 22px;background:none;border:none;cursor:pointer;
+  font-family:'Cairo',sans-serif;font-size:14px;font-weight:700;color:var(--muted);
+  border-bottom:3px solid transparent;margin-bottom:-1px;
+  transition:all .15s;white-space:nowrap;
+}
+.main-tab:hover{color:var(--ink)}
+.main-tab.active{color:var(--ink);border-bottom-color:var(--gold)}
+.main-tab .badge{
+  background:var(--gold);color:var(--ink);
+  font-size:10px;padding:1px 7px;border-radius:999px;margin-right:6px;
+  font-family:'IBM Plex Mono',monospace;font-weight:700;
+}
+
+/* LAYOUT */
+.layout{
+  max-width:1400px;margin:0 auto;
+  display:grid;grid-template-columns: 380px 1fr;gap:20px;
+}
+@media (max-width:1024px){.layout{grid-template-columns:1fr}}
+
+/* PANEL */
+.panel{
+  background:var(--paper);border:1px solid var(--line);border-radius:12px;
+  box-shadow:var(--shadow);overflow:hidden;
+}
+.panel-header{
+  background:var(--ink);color:var(--paper);padding:13px 18px;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+}
+.panel-header h2{font-size:14px;font-weight:700;letter-spacing:0.02em}
+.panel-header .pill{
+  background:var(--gold);color:var(--ink);padding:2px 10px;border-radius:999px;
+  font-size:11px;font-weight:700;font-family:'IBM Plex Mono',monospace;
+}
+.panel-body{padding:16px}
+
+/* SECTIONS */
+.section{margin-bottom:18px}
+.section:last-child{margin-bottom:0}
+.section-title{
+  font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:9px;padding-bottom:5px;
+  border-bottom:1px dashed var(--line);
+  display:flex;justify-content:space-between;align-items:center;
+}
+
+/* FIELDS */
+.field{margin-bottom:9px}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.field-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px}
+.field label{
+  display:block;font-size:11.5px;color:var(--muted);margin-bottom:3px;font-weight:600;
+}
+.field label .unit{color:var(--gold);font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700}
+input[type="number"], input[type="text"], select{
+  width:100%;padding:7px 9px;border:1px solid var(--line);border-radius:6px;
+  background:white;font-family:'IBM Plex Mono',monospace;font-size:13px;
+  color:var(--ink);direction:ltr;text-align:right;
+  transition:border-color .15s,box-shadow .15s;
+}
+select{font-family:'Cairo',sans-serif;direction:rtl;text-align:right}
+input:focus, select:focus{
+  outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(184,137,58,.15);
+}
+input[readonly]{background:var(--bg);color:var(--muted)}
+
+/* LAYERS */
+.layers-container{
+  display:flex;flex-direction:column;gap:7px;
+}
+.layer-empty{
+  text-align:center;color:var(--muted);font-size:11.5px;font-style:italic;
+  padding:14px 8px;background:var(--bg);border:1px dashed var(--line);border-radius:6px;
+}
+.layer-card{
+  background:white;border:1px solid var(--line);border-radius:7px;padding:9px;
+  border-right:3px solid var(--gold);
+}
+.layer-card.back{border-right-color:var(--accent)}
+.layer-header{
+  display:flex;align-items:center;gap:6px;margin-bottom:7px;
+}
+.layer-header select{flex:1}
+.layer-header .layer-num{
+  width:20px;height:20px;background:var(--ink);color:var(--paper);
+  border-radius:50%;display:inline-flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:700;font-family:'IBM Plex Mono',monospace;
+  flex-shrink:0;
+}
+.layer-header .del-layer{
+  background:transparent;border:none;color:var(--danger);cursor:pointer;
+  font-size:16px;padding:2px 6px;border-radius:4px;flex-shrink:0;
+}
+.layer-header .del-layer:hover{background:rgba(156,58,42,.1)}
+.layer-fields{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.layer-fields-3{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:5px}
+.layer-fields .field{margin-bottom:0}
+.layer-fields-3 .field{margin-bottom:0}
+
+/* MATERIAL CARD (Face / Back) */
+.material-card{
+  background:white;border:1px solid var(--line);border-radius:8px;padding:12px;
+  margin-bottom:10px;
+}
+.material-card.face{border-right:4px solid var(--gold)}
+.material-card.back{border-right:4px solid var(--accent)}
+.material-card-header{
+  display:flex;justify-content:space-between;align-items:center;margin-bottom:9px;
+}
+.material-card-header h3{font-size:13px;font-weight:700}
+.material-card-header h3 .icon{margin-left:5px;font-size:14px}
+.material-fields{display:none;margin-top:10px;padding-top:10px;border-top:1px dashed var(--line)}
+.material-fields.show{display:block}
+
+/* SHAPE BUTTONS */
+.calc-shape{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;
+}
+.shape-btn{
+  padding:13px 8px;border:2px solid var(--line);background:white;cursor:pointer;
+  border-radius:8px;display:flex;flex-direction:column;align-items:center;gap:5px;
+  font-weight:600;font-size:12.5px;color:var(--muted);
+  transition:all .15s;
+}
+.shape-btn:hover{border-color:var(--gold-soft);color:var(--ink)}
+.shape-btn.active{
+  border-color:var(--ink);background:var(--ink);color:var(--paper);
+}
+.shape-btn.active .shape-icon{color:var(--gold)}
+.shape-icon{font-size:22px;line-height:1}
+
+/* RESULTS */
+.result-grid{
+  display:grid;grid-template-columns:repeat(auto-fit, minmax(140px,1fr));gap:9px;
+  margin-top:12px;
+}
+.stat{
+  background:var(--bg);border:1px solid var(--line);padding:11px;border-radius:8px;
+  position:relative;overflow:hidden;
+}
+.stat-label{
+  font-size:10.5px;color:var(--muted);font-weight:600;letter-spacing:0.04em;
+  text-transform:uppercase;margin-bottom:3px;
+}
+.stat-value{
+  font-family:'IBM Plex Mono',monospace;font-size:17px;font-weight:700;
+  color:var(--ink);direction:ltr;text-align:right;
+}
+.stat-unit{font-size:10px;color:var(--muted);margin-right:3px}
+.stat.gold{background:linear-gradient(135deg, var(--gold-soft) 0%, var(--gold-light) 100%);border-color:var(--gold)}
+.stat.gold .stat-value{color:#5a3e10}
+.stat.dark{background:var(--ink);border-color:var(--ink)}
+.stat.dark .stat-label{color:var(--gold-soft)}
+.stat.dark .stat-value{color:var(--paper)}
+.stat.green{background:#e8f0e8;border-color:#a8c5a8}
+.stat.green .stat-value{color:var(--green)}
+.stat.warning{background:#fdf3e0;border-color:#e8c98a}
+.stat.warning .stat-value{color:var(--warning)}
+
+/* TABLE */
+.table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:8px;margin-top:14px;background:white}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+thead{background:var(--ink);color:var(--paper)}
+th{padding:10px 8px;text-align:right;font-weight:700;font-size:11.5px;letter-spacing:0.02em;white-space:nowrap}
+td{padding:8px;border-top:1px solid var(--line);font-family:'IBM Plex Mono',monospace;font-size:12.5px;direction:ltr;text-align:right}
+td:first-child, td.txt{font-family:'Cairo',sans-serif;font-weight:600;direction:rtl;text-align:right}
+tbody tr:hover{background:var(--bg)}
+tfoot{background:var(--gold-light);font-weight:700}
+tfoot td{border-top:2px solid var(--gold)}
+
+/* COST BREAKDOWN */
+.breakdown{margin-top:16px}
+.breakdown-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:9px 11px;border-bottom:1px solid var(--line);font-size:13px;
+}
+.breakdown-row:last-child{border-bottom:none}
+.breakdown-row.total{
+  background:var(--ink);color:var(--paper);border-radius:8px;margin-top:7px;
+  font-weight:700;border:none;
+}
+.breakdown-row.subtotal{background:var(--bg);font-weight:700}
+.breakdown-row.refund{color:var(--green)}
+.breakdown-row .amount{font-family:'IBM Plex Mono',monospace;direction:ltr}
+
+/* TABS */
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--line);margin-bottom:14px}
+.tab{
+  padding:9px 16px;background:none;border:none;cursor:pointer;
+  font-family:'Cairo',sans-serif;font-size:13px;font-weight:600;color:var(--muted);
+  border-bottom:3px solid transparent;margin-bottom:-1px;
+  transition:all .15s;
+}
+.tab:hover{color:var(--ink)}
+.tab.active{color:var(--ink);border-bottom-color:var(--gold)}
+
+/* BUTTONS */
+.btn{
+  padding:9px 16px;border:none;border-radius:6px;cursor:pointer;
+  font-family:'Cairo',sans-serif;font-weight:700;font-size:12.5px;
+  transition:all .15s;display:inline-flex;align-items:center;gap:5px;
+}
+.btn-primary{background:var(--ink);color:var(--paper)}
+.btn-primary:hover{background:var(--gold);color:var(--ink)}
+.btn-gold{background:var(--gold);color:var(--ink)}
+.btn-gold:hover{background:var(--ink);color:var(--paper)}
+.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--line)}
+.btn-ghost:hover{border-color:var(--ink);color:var(--ink)}
+.btn-sm{padding:5px 10px;font-size:11.5px}
+.btn-row{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}
+
+/* VIZ */
+.viz{
+  margin-top:14px;padding:14px;background:white;border:1px solid var(--line);border-radius:8px;
+  display:flex;align-items:center;justify-content:center;min-height:240px;
+}
+.viz svg{max-width:100%;height:auto}
+
+/* TOAST */
+.toast{
+  position:fixed;bottom:22px;left:50%;transform:translateX(-50%);
+  background:var(--ink);color:var(--paper);padding:9px 18px;border-radius:6px;
+  font-size:12.5px;font-weight:600;opacity:0;pointer-events:none;
+  transition:opacity .2s;z-index:1000;
+}
+.toast.show{opacity:1}
+
+/* SIZE LIST */
+.size-list{display:flex;flex-direction:column;gap:6px;max-height:380px;overflow-y:auto;padding:3px}
+.size-item{
+  display:grid;grid-template-columns: 100px 90px 90px 60px auto auto;gap:6px;
+  padding:7px;background:var(--bg);border:1px solid var(--line);border-radius:6px;
+  align-items:center;font-size:12px;
+}
+.size-item input,.size-item select{padding:5px 7px;font-size:12px}
+.size-item .del{
+  background:transparent;border:none;color:var(--danger);cursor:pointer;
+  font-size:17px;padding:3px 7px;border-radius:4px;
+}
+.size-item .del:hover{background:rgba(156,58,42,.1)}
+
+/* Hide rectangle's "width" field properly when not used */
+input[data-hidden="true"]{visibility:hidden}
+@media (max-width: 768px){
+  input[data-hidden="true"]{display:none !important}
+}
+
+.size-item.order-row{
+  grid-template-columns: 95px 70px 70px 80px 80px auto;
+}
+@media (max-width: 768px){
+  .size-item.order-row{
+    grid-template-columns: 1fr 1fr !important;
+  }
+}
+
+.hint{
+  font-size:10.5px;color:var(--muted);margin-top:3px;font-style:italic;
+  padding-right:3px;
+}
+
+details > summary{list-style:none;cursor:pointer}
+details > summary::-webkit-details-marker{display:none}
+details[open] .arrow{transform:rotate(90deg)}
+.arrow{display:inline-block;transition:transform .2s;font-size:10px;color:var(--gold)}
+
+/* RECIPES */
+.recipe-list{
+  display:grid;grid-template-columns:repeat(auto-fill, minmax(220px, 1fr));gap:10px;
+  margin-top:14px;
+}
+.recipe-card{
+  background:white;border:1px solid var(--line);border-radius:8px;padding:12px;
+  cursor:pointer;transition:all .15s;
+}
+.recipe-card:hover{border-color:var(--gold);box-shadow:var(--shadow);transform:translateY(-1px)}
+.recipe-card h4{font-size:13.5px;margin-bottom:6px;font-weight:700;color:var(--ink)}
+.recipe-card p{font-size:11.5px;color:var(--muted);line-height:1.5}
+.recipe-card .recipe-actions{
+  display:flex;gap:6px;margin-top:8px;padding-top:8px;border-top:1px dashed var(--line);
+}
+
+/* WARNINGS */
+.warnings{
+  background:#fdf3e0;border:1px solid #e8c98a;border-radius:8px;padding:12px;
+  margin-top:14px;
+}
+.warnings h4{font-size:12.5px;color:var(--warning);margin-bottom:6px;font-weight:700}
+.warnings ul{margin-right:18px;font-size:12px;color:#7a4d10}
+.warnings li{margin-bottom:3px}
+
+/* MULTI LAYOUT TAB */
+.multi-pieces-list{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.multi-piece-item{
+  display:grid;grid-template-columns: 110px 80px 80px 80px auto auto;gap:6px;
+  padding:7px;background:var(--bg);border:1px solid var(--line);border-radius:6px;
+  align-items:center;font-size:12px;
+}
+
+/* ORDER */
+.order-summary{
+  background:var(--gold-light);border:2px solid var(--gold);border-radius:10px;
+  padding:14px;margin-top:14px;
+}
+.order-summary h3{font-size:14px;margin-bottom:10px;color:#5a3e10}
+
+@media print{
+  body{background:white;padding:0}
+  .panel{box-shadow:none;border:1px solid #ccc;page-break-inside:avoid}
+  .btn-row,.tabs,.shape-btn:not(.active),.main-tabs,aside{display:none}
+  .layout{grid-template-columns:1fr}
+}
+
+/* ============= MOBILE OPTIMIZATIONS (iPhone & Android) ============= */
+@media (max-width: 768px){
+  body{padding:14px 10px 50px}
+  .header{margin-bottom:18px;padding-bottom:12px}
+  .brand h1{font-size:22px}
+  .brand p{font-size:12px}
+  .header-meta{font-size:10px}
+
+  .main-tabs{
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
+  }
+  .main-tabs::-webkit-scrollbar{display:none}
+  .main-tab{
+    padding:10px 14px;font-size:13px;
+    flex-shrink:0;
+  }
+
+  .layout{gap:14px}
+  .panel-body{padding:12px}
+  .panel-header{padding:11px 14px}
+  .panel-header h2{font-size:13px}
+
+  /* CRITICAL: Prevent iOS auto-zoom by setting font-size >= 16px */
+  input[type="number"], input[type="text"], select{
+    font-size:16px !important;
+    padding:9px 10px;
+  }
+
+  .field label{font-size:12px}
+  .field-row, .field-row-3{
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+  }
+
+  /* Layer cards: stack fields */
+  .layer-fields{grid-template-columns:1fr 1fr;gap:6px}
+  .layer-fields-3{grid-template-columns:1fr 1fr;gap:6px}
+
+  /* Shape buttons - smaller */
+  .calc-shape{gap:6px}
+  .shape-btn{padding:11px 6px;font-size:12px}
+  .shape-icon{font-size:20px}
+
+  /* Stats grid - more compact */
+  .result-grid{
+    grid-template-columns:repeat(2, 1fr);
+    gap:7px;
+  }
+  .stat{padding:9px}
+  .stat-label{font-size:9.5px}
+  .stat-value{font-size:15px}
+
+  /* Breakdown rows */
+  .breakdown-row{padding:8px 9px;font-size:12px}
+  .breakdown-row .amount{font-size:12px}
+
+  /* Tables horizontal scroll */
+  .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  table{min-width:560px;font-size:12px}
+  th,td{padding:7px 6px;font-size:11.5px}
+
+  /* Multi-piece list items: stack vertically */
+  .multi-piece-item{
+    grid-template-columns: 1fr 1fr;
+    gap:6px;
+    padding:9px;
+  }
+  .multi-piece-item > *:first-child{grid-column:1/-1}
+  .multi-piece-item .ms-label{grid-column:1/-1}
+  .multi-piece-item .del{grid-column:2;justify-self:end;font-size:20px;padding:6px 12px}
+
+  /* Size list items: stack */
+  .size-item{
+    grid-template-columns: 1fr 1fr !important;
+    gap:6px !important;
+    padding:9px;
+  }
+  .size-item > *:first-child{grid-column:1/-1}
+  .size-item .ms-label{grid-column:1/-1}
+  .size-item .del{
+    grid-column:2;justify-self:end;
+    font-size:22px;padding:6px 14px;
+    background:#fff5f3;border-radius:6px;
+  }
+
+  /* Visualization */
+  .viz{padding:10px;min-height:auto}
+  .viz svg{width:100%;height:auto}
+
+  /* Buttons - larger touch targets */
+  .btn{
+    padding:11px 16px;
+    font-size:13px;
+    min-height:42px;
+  }
+  .btn-sm{padding:7px 12px;font-size:12px;min-height:34px}
+
+  .btn-row{gap:8px}
+  .btn-row .btn{flex:1;justify-content:center;min-width:0}
+
+  /* Layer cards more touch-friendly */
+  .layer-card{padding:11px}
+  .layer-header{gap:8px}
+  .layer-header select{font-size:14px;padding:7px 9px}
+  .layer-header .del-layer{font-size:22px;padding:4px 10px}
+  .layer-header .layer-num{width:24px;height:24px;font-size:12px}
+
+  /* Recipes grid */
+  .recipe-list{grid-template-columns:1fr;gap:9px}
+  .recipe-card{padding:14px}
+
+  /* Toast */
+  .toast{
+    bottom:18px;left:14px;right:14px;transform:none;
+    text-align:center;font-size:13px;
+  }
+  .toast.show{transform:none}
+
+  /* Order summary stats */
+  .order-summary{padding:12px}
+  .order-summary h3{font-size:13px}
+
+  /* Warnings */
+  .warnings{padding:11px}
+  .warnings h4{font-size:12px}
+  .warnings ul{font-size:11.5px;margin-right:16px}
+
+  /* Section title with button */
+  .section-title{font-size:10.5px;flex-wrap:wrap;gap:4px}
+
+  /* Hide hint texts on very small screens to save space */
+  .hint{font-size:10px}
+}
+
+/* iPhone SE / very small screens */
+@media (max-width: 380px){
+  .field-row, .field-row-3{grid-template-columns:1fr}
+  .result-grid{grid-template-columns:1fr 1fr}
+  .calc-shape{grid-template-columns:1fr}
+  .shape-btn{flex-direction:row;justify-content:center;gap:8px;padding:10px}
+  .shape-icon{font-size:18px}
+  .header-meta{display:none}
+  .brand h1{font-size:20px}
+  .brand p{display:none}
+}
+
+/* Touch-friendly: bigger checkboxes and selects */
+@media (hover: none) and (pointer: coarse){
+  select{
+    background-image:
+      linear-gradient(45deg, transparent 50%, var(--muted) 50%),
+      linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+    background-position:
+      calc(0% + 12px) 50%,
+      calc(0% + 17px) 50%;
+    background-size: 5px 5px, 5px 5px;
+    background-repeat: no-repeat;
+    padding-left: 26px;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="brand">
+    <h1>حاسبة قواعد الكارتون <span>·</span> <span>v3</span></h1>
+    <p>طبقات متعددة · مقاس فرخ متغير · طلبية بالكيلو والعدد</p>
+  </div>
+  <div class="header-meta">
+    <div>UNIT · <b>EGP</b></div>
+    <div>SHEET · <b id="sheetSizeLabel">70 × 100 cm</b></div>
+    <div>BALE · <b>25 KG</b></div>
+  </div>
+</header>
+
+<!-- MAIN TABS -->
+<nav class="main-tabs">
+  <button class="main-tab active" data-main="single">حاسبة قاعدة واحدة</button>
+  <button class="main-tab" data-main="multi-sheet">النشر المتعدد على الفرخ</button>
+  <button class="main-tab" data-main="batch">جدول مقاسات متعددة</button>
+  <button class="main-tab" data-main="order">حاسبة طلبية كاملة</button>
+  <button class="main-tab" data-main="recipes">الوصفات المحفوظة <span class="badge" id="recipeCount">0</span></button>
+</nav>
+
+<div class="layout">
+
+  <!-- LEFT: SETTINGS -->
+  <aside class="panel" id="settingsPanel">
+    <div class="panel-header">
+      <h2>إعدادات المواد والأسعار</h2>
+      <span class="pill">INPUTS</span>
+    </div>
+    <div class="panel-body">
+
+      <!-- SHEET SIZE -->
+      <div class="section">
+        <div class="section-title"><span>مقاس الفرخ</span></div>
+        <div class="field-row">
+          <div class="field">
+            <label>الطول <span class="unit">CM</span></label>
+            <input type="number" id="sheetWidth" value="70" min="20" max="200" step="1">
+          </div>
+          <div class="field">
+            <label>العرض <span class="unit">CM</span></label>
+            <input type="number" id="sheetHeight" value="100" min="20" max="200" step="1">
+          </div>
+        </div>
+        <div class="hint" id="sheetAreaHint">المساحة: 7000 سم² (0.7 م²)</div>
+      </div>
+
+      <!-- KARTON -->
+      <div class="section">
+        <div class="section-title"><span>الكارتون السميك</span></div>
+        <div class="field-row">
+          <div class="field">
+            <label>نمرة الكارتون <span class="unit">No.</span></label>
+            <input type="number" id="kartonNumber" value="25" min="5" max="60" step="1">
+            <div class="hint">عدد الأفرخ 70×100 في البالة 25 كجم</div>
+          </div>
+          <div class="field">
+            <label>سعر البالة <span class="unit">EGP</span></label>
+            <input type="number" id="balePrice" value="500" step="50">
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>وزن الفرخ <span class="unit">جم</span></label>
+            <input type="text" id="sheetWeight" readonly>
+          </div>
+          <div class="field">
+            <label>سعر الفرخ <span class="unit">EGP</span></label>
+            <input type="text" id="sheetPrice" readonly>
+          </div>
+        </div>
+        <div class="hint" id="kartonScaleHint" style="color:var(--gold);font-weight:600">
+          ↻ الوزن والسعر يتم حسابهم بالتناسب على المقاس الحالي
+        </div>
+      </div>
+
+      <!-- FACE LAYERS -->
+      <div class="section">
+        <div class="section-title">
+          <span>طبقات الوجه (الوش)</span>
+          <button class="btn btn-gold btn-sm" onclick="addLayer('face')" style="padding:3px 9px;font-size:11px">+ طبقة</button>
+        </div>
+        <div id="faceLayers" class="layers-container"></div>
+      </div>
+
+      <!-- BACK LAYERS -->
+      <div class="section">
+        <div class="section-title">
+          <span>طبقات الضهر</span>
+          <button class="btn btn-gold btn-sm" onclick="addLayer('back')" style="padding:3px 9px;font-size:11px">+ طبقة</button>
+        </div>
+        <div id="backLayers" class="layers-container"></div>
+      </div>
+
+      <!-- PROCESSES -->
+      <div class="section">
+        <div class="section-title"><span>العمليات</span></div>
+        <div class="field-row">
+          <div class="field">
+            <label>لصق الوجه <span class="unit">EGP / فرخ</span></label>
+            <input type="number" id="lasqFacePrice" value="0.5" step="0.1">
+            <div class="hint">لصق ورق/ميتاليز على وش الكارتون</div>
+          </div>
+          <div class="field">
+            <label>لصق الضهر <span class="unit">EGP / فرخ</span></label>
+            <input type="number" id="lasqBackPrice" value="0.4" step="0.1">
+            <div class="hint">لصق ورق/ميتاليز على ضهر الكارتون</div>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>البصمة <span class="unit">EGP / فرخ</span></label>
+            <input type="number" id="bosmaPrice" value="0" step="0.1">
+          </div>
+          <div class="field">
+            <label>التكسير <span class="unit">EGP / فرخ</span></label>
+            <input type="number" id="cuttingPrice" value="0.4" step="0.1">
+          </div>
+        </div>
+        <div class="field">
+          <label>مصنعية ماكينة الميتاليز/السلفان <span class="unit">% من سعر الطبقة</span></label>
+          <input type="number" id="machinePctOfFace" value="30" step="1">
+          <div class="hint">تُحسب على كل طبقة ميتاليز أو سلفان (وجه أو ضهر)</div>
+        </div>
+      </div>
+
+      <!-- SILICATE & WASTE -->
+      <div class="section">
+        <div class="section-title"><span>السيليكات والهالك</span></div>
+        <div class="field-row-3">
+          <div class="field">
+            <label>سيليكات/فرخ <span class="unit">جم</span></label>
+            <input type="number" id="silicateGrams" value="100" step="5">
+          </div>
+          <div class="field">
+            <label>سعر السيليكات <span class="unit">EGP/KG</span></label>
+            <input type="number" id="silicatePrice" value="15" step="1">
+          </div>
+          <div class="field">
+            <label>سعر الهالك <span class="unit">EGP/KG</span></label>
+            <input type="number" id="wastePrice" value="5" step="0.5">
+          </div>
+        </div>
+      </div>
+
+      <!-- OVERHEAD & PROFIT -->
+      <div class="section">
+        <div class="section-title"><span>المصاريف والربح</span></div>
+        <div class="field-row">
+          <div class="field">
+            <label>مصاريف غير مباشرة <span class="unit">%</span></label>
+            <input type="number" id="overheadPct" value="15" step="1">
+          </div>
+          <div class="field">
+            <label>هامش الربح <span class="unit">%</span></label>
+            <input type="number" id="profitPct" value="25" step="1">
+          </div>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-primary btn-sm" onclick="saveSettings()">💾 حفظ</button>
+        <button class="btn btn-ghost btn-sm" onclick="resetSettings()">↻ افتراضي</button>
+        <button class="btn btn-gold btn-sm" onclick="saveAsRecipe()">⭐ حفظ كوصفة</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- RIGHT: MAIN CONTENT -->
+  <main>
+
+    <!-- TAB 1: SINGLE -->
+    <section class="main-section" data-section="single">
+      <div class="panel">
+        <div class="panel-header">
+          <h2>حاسبة قاعدة واحدة</h2>
+          <span class="pill" id="resultPricePill">— EGP/KG</span>
+        </div>
+        <div class="panel-body">
+
+          <div class="calc-shape">
+            <button class="shape-btn active" data-shape="circle">
+              <span class="shape-icon">⬤</span>
+              <span>دائرية</span>
+            </button>
+            <button class="shape-btn" data-shape="square">
+              <span class="shape-icon">■</span>
+              <span>مربعة</span>
+            </button>
+            <button class="shape-btn" data-shape="rectangle">
+              <span class="shape-icon">▬</span>
+              <span>مستطيلة</span>
+            </button>
+          </div>
+
+          <div class="field-row" id="dimsCircle">
+            <div class="field">
+              <label>قطر القاعدة <span class="unit">CM</span></label>
+              <input type="number" id="diameter" value="25" step="1" min="5" max="68">
+            </div>
+            <div class="field">
+              <label>الكمية المطلوبة <span class="unit">قطعة</span></label>
+              <input type="number" id="qtySingle" value="100" step="10" min="1">
+            </div>
+          </div>
+
+          <div class="field-row" id="dimsSquare" style="display:none">
+            <div class="field">
+              <label>الضلع <span class="unit">CM</span></label>
+              <input type="number" id="sqSide" value="25" step="1" min="5" max="68">
+            </div>
+            <div class="field">
+              <label>الكمية المطلوبة <span class="unit">قطعة</span></label>
+              <input type="number" id="qtySingle2" value="100" step="10" min="1">
+            </div>
+          </div>
+
+          <div class="field-row-3" id="dimsRect" style="display:none">
+            <div class="field">
+              <label>الطول <span class="unit">CM</span></label>
+              <input type="number" id="rectL" value="30" step="1" min="5" max="98">
+            </div>
+            <div class="field">
+              <label>العرض <span class="unit">CM</span></label>
+              <input type="number" id="rectW" value="20" step="1" min="5" max="68">
+            </div>
+            <div class="field">
+              <label>الكمية <span class="unit">قطعة</span></label>
+              <input type="number" id="qtySingle3" value="100" step="10" min="1">
+            </div>
+          </div>
+
+          <div class="viz" id="vizContainer">
+            <svg id="layoutSvg" viewBox="0 0 700 500" xmlns="http://www.w3.org/2000/svg"></svg>
+          </div>
+
+          <div class="result-grid">
+            <div class="stat">
+              <div class="stat-label">قطع/فرخ</div>
+              <div class="stat-value" id="piecesPerSheet">—</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">% الاستغلال</div>
+              <div class="stat-value" id="utilization">—<span class="stat-unit">%</span></div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">وزن القطعة</div>
+              <div class="stat-value" id="pieceWeight">—<span class="stat-unit">جم</span></div>
+            </div>
+            <div class="stat warning">
+              <div class="stat-label">وزن الهالك</div>
+              <div class="stat-value" id="wasteWeight">—<span class="stat-unit">جم</span></div>
+            </div>
+            <div class="stat green">
+              <div class="stat-label">عائد الهالك</div>
+              <div class="stat-value" id="wasteValue">—<span class="stat-unit">EGP</span></div>
+            </div>
+            <div class="stat gold">
+              <div class="stat-label">سعر القطعة</div>
+              <div class="stat-value" id="pricePerPiece">—</div>
+            </div>
+          </div>
+
+          <div class="breakdown" id="breakdown"></div>
+
+          <div id="warningsBox"></div>
+
+          <div class="btn-row">
+            <button class="btn btn-primary" onclick="addCurrentToBatch()">+ إضافة لجدول المقارنة</button>
+            <button class="btn btn-ghost" onclick="window.print()">🖨️ طباعة</button>
+            <button class="btn btn-ghost" onclick="exportSingleAsImage()">📷 تصدير صورة</button>
+          </div>
+
+        </div>
+      </div>
+
+      <details style="margin-top:14px;background:var(--paper);padding:12px 16px;border:1px solid var(--line);border-radius:8px">
+        <summary style="font-weight:700;font-size:13px;color:var(--muted)">
+          <span class="arrow">▶</span> تفاصيل الحساب الكاملة
+        </summary>
+        <div id="fullDetails" style="margin-top:10px;font-size:12px;line-height:1.7;color:var(--muted);font-family:'IBM Plex Mono',monospace;direction:ltr;text-align:left;white-space:pre-wrap"></div>
+      </details>
+    </section>
+
+    <!-- TAB 2: MULTI-SHEET LAYOUT -->
+    <section class="main-section" data-section="multi-sheet" style="display:none">
+      <div class="panel">
+        <div class="panel-header">
+          <h2>النشر المتعدد على الفرخ</h2>
+          <span class="pill">SMART PACK</span>
+        </div>
+        <div class="panel-body">
+          <p style="color:var(--muted);font-size:12.5px;margin-bottom:12px">
+            ضع أكثر من مقاس على نفس الفرخ. الأداة ترتبهم بأفضل شكل وتوزع التكلفة بالمساحة.
+          </p>
+
+          <div class="multi-pieces-list" id="multiPiecesList"></div>
+
+          <div class="btn-row">
+            <button class="btn btn-ghost" onclick="addMultiPiece()">+ إضافة مقاس</button>
+            <button class="btn btn-primary" onclick="calculateMultiSheet()">احسب التوزيع</button>
+          </div>
+
+          <div class="viz" id="multiVizContainer">
+            <svg id="multiLayoutSvg" viewBox="0 0 700 500" xmlns="http://www.w3.org/2000/svg"></svg>
+          </div>
+
+          <div id="multiResults"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: BATCH -->
+    <section class="main-section" data-section="batch" style="display:none">
+      <div class="panel">
+        <div class="panel-header">
+          <h2>جدول مقاسات متعددة</h2>
+          <span class="pill">COMPARE</span>
+        </div>
+        <div class="panel-body">
+          <p style="color:var(--muted);font-size:12.5px;margin-bottom:12px">
+            قارن التكلفة والسعر بين عدة مقاسات (كل واحدة على فرخ منفصل).
+          </p>
+          <div class="size-list" id="sizeList"></div>
+          <div class="btn-row">
+            <button class="btn btn-ghost" onclick="addSizeRow()">+ إضافة مقاس</button>
+            <button class="btn btn-ghost" onclick="loadStandardSizes()">📋 تحميل المقاسات الشائعة</button>
+            <button class="btn btn-primary" onclick="calculateAllSizes()">احسب الكل</button>
+          </div>
+          <div class="table-wrap" style="margin-top:14px">
+            <table id="resultsTable">
+              <thead>
+                <tr>
+                  <th>المقاس</th>
+                  <th>قطع/فرخ</th>
+                  <th>وزن (جم)</th>
+                  <th>التكلفة</th>
+                  <th>سعر البيع</th>
+                  <th>سعر/كيلو</th>
+                </tr>
+              </thead>
+              <tbody id="resultsBody">
+                <tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px">— أضف مقاسات واضغط "احسب الكل" —</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: ORDER -->
+    <section class="main-section" data-section="order" style="display:none">
+      <div class="panel">
+        <div class="panel-header">
+          <h2>حاسبة طلبية كاملة</h2>
+          <span class="pill">ORDER</span>
+        </div>
+        <div class="panel-body">
+          <p style="color:var(--muted);font-size:12.5px;margin-bottom:12px">
+            احسب احتياجات الخامات وإجمالي التكلفة والربح لطلبية متعددة المقاسات. تقدر تدخل الكمية بالعدد أو بالكيلو.
+          </p>
+          <div class="size-list" id="orderList"></div>
+          <div class="btn-row">
+            <button class="btn btn-ghost" onclick="addOrderRow()">+ إضافة مقاس</button>
+            <button class="btn btn-primary" onclick="calculateOrder()">احسب الطلبية</button>
+          </div>
+          <div id="orderSummary"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 5: RECIPES -->
+    <section class="main-section" data-section="recipes" style="display:none">
+      <div class="panel">
+        <div class="panel-header">
+          <h2>الوصفات المحفوظة</h2>
+          <span class="pill">PRESETS</span>
+        </div>
+        <div class="panel-body">
+          <p style="color:var(--muted);font-size:12.5px;margin-bottom:12px">
+            احفظ تركيبات المنتجات اللي بتشتغل عليها كثيراً، واستدعها بضغطة.
+          </p>
+          <div class="recipe-list" id="recipeList">
+            <p style="color:var(--muted);text-align:center;padding:30px;grid-column:1/-1">
+              — لا توجد وصفات محفوظة بعد. اضغط "حفظ كوصفة" من إعدادات اليسار —
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================
+// CONSTANTS & DYNAMIC SHEET SIZE
+// ============================================
+const STD_SHEET_W = 70, STD_SHEET_H = 100;
+const STD_SHEET_AREA_CM2 = STD_SHEET_W * STD_SHEET_H; // 7000
+const MARGIN = 1, GAP = 1;
+const PET_DENSITY = 1.4; // g/cm³ for metalize/selophane
+
+// dynamic sheet size getters
+function sheetW(){ return +$('sheetWidth')?.value || STD_SHEET_W; }
+function sheetH(){ return +$('sheetHeight')?.value || STD_SHEET_H; }
+function sheetAreaCm2(){ return sheetW() * sheetH(); }
+function sheetAreaM2(){ return sheetAreaCm2() / 10000; }
+function sheetAreaRatio(){ return sheetAreaCm2() / STD_SHEET_AREA_CM2; }
+
+// ============================================
+// STATE
+// ============================================
+const STATE = {
+  shape: 'circle',
+  multiPieces: [],
+  recipes: [],
+  faceLayers: [],   // [{id, type, micron, price, gsm, tonPrice, colors, pricePerColor}]
+  backLayers: []
+};
+
+// ============================================
+// HELPERS
+// ============================================
+const $ = id => document.getElementById(id);
+const fmt = (n, d=2) => isFinite(n) ? Number(n).toLocaleString('en-US', {minimumFractionDigits:d, maximumFractionDigits:d}) : '—';
+const fmtInt = n => isFinite(n) ? Math.round(n).toLocaleString('en-US') : '—';
+
+function toast(msg, type='info'){
+  const t = $('toast');
+  t.textContent = msg;
+  t.style.background = type==='error' ? 'var(--danger)' : 'var(--ink)';
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2000);
+}
+
+// ============================================
+// LAYERS SYSTEM
+// ============================================
+const LAYER_TYPES = {
+  metalize: {label: 'ميتاليز ذهب', defaults: {micron: 21, price: 180}},
+  selophane: {label: 'سلفان', defaults: {micron: 17, price: 140}},
+  paper_plain: {label: 'ورق سادة', defaults: {gsm: 80, tonPrice: 50000}},
+  paper_print: {label: 'ورق مطبوع', defaults: {gsm: 80, tonPrice: 50000, colors: 4, pricePerColor: 0.15}}
+};
+
+let layerIdCounter = 0;
+function nextLayerId(){ return ++layerIdCounter; }
+
+function addLayer(side, data){
+  const layers = side === 'face' ? STATE.faceLayers : STATE.backLayers;
+  const type = data?.type || 'metalize';
+  const def = LAYER_TYPES[type].defaults;
+  const layer = {
+    id: nextLayerId(),
+    type,
+    micron: data?.micron ?? def.micron ?? '',
+    price: data?.price ?? def.price ?? '',
+    gsm: data?.gsm ?? def.gsm ?? '',
+    tonPrice: data?.tonPrice ?? def.tonPrice ?? '',
+    colors: data?.colors ?? def.colors ?? 0,
+    pricePerColor: data?.pricePerColor ?? def.pricePerColor ?? 0
+  };
+  layers.push(layer);
+  renderLayers(side);
+  renderActive();
+}
+
+function removeLayer(side, id){
+  const layers = side === 'face' ? STATE.faceLayers : STATE.backLayers;
+  const idx = layers.findIndex(l => l.id === id);
+  if (idx >= 0){
+    layers.splice(idx, 1);
+    renderLayers(side);
+    renderActive();
+  }
+}
+
+function updateLayerField(side, id, field, value){
+  const layers = side === 'face' ? STATE.faceLayers : STATE.backLayers;
+  const layer = layers.find(l => l.id === id);
+  if (layer){
+    layer[field] = value;
+    renderActive();
+  }
+}
+
+function changeLayerType(side, id, newType){
+  const layers = side === 'face' ? STATE.faceLayers : STATE.backLayers;
+  const layer = layers.find(l => l.id === id);
+  if (!layer) return;
+  layer.type = newType;
+  // Set defaults for new type
+  const def = LAYER_TYPES[newType].defaults;
+  Object.entries(def).forEach(([k, v]) => { layer[k] = v; });
+  renderLayers(side);
+  renderActive();
+}
+
+function renderLayers(side){
+  const container = $(side + 'Layers');
+  const layers = side === 'face' ? STATE.faceLayers : STATE.backLayers;
+
+  if (layers.length === 0){
+    container.innerHTML = `<div class="layer-empty">— لا توجد طبقات. اضغط "+ طبقة" لإضافة طبقة —</div>`;
+    return;
+  }
+
+  container.innerHTML = layers.map((layer, idx) => {
+    const t = layer.type;
+    let fields = '';
+    if (t === 'metalize' || t === 'selophane'){
+      fields = `
+        <div class="layer-fields">
+          <div class="field">
+            <label>السُمك <span class="unit">µm</span></label>
+            <input type="number" value="${layer.micron}" step="0.5" oninput="updateLayerField('${side}', ${layer.id}, 'micron', this.value)">
+          </div>
+          <div class="field">
+            <label>سعر الكيلو <span class="unit">EGP/KG</span></label>
+            <input type="number" value="${layer.price}" step="5" oninput="updateLayerField('${side}', ${layer.id}, 'price', this.value)">
+          </div>
+        </div>`;
+    } else if (t === 'paper_plain'){
+      fields = `
+        <div class="layer-fields">
+          <div class="field">
+            <label>وزن المتر <span class="unit">جم/م²</span></label>
+            <input type="number" value="${layer.gsm}" step="5" oninput="updateLayerField('${side}', ${layer.id}, 'gsm', this.value)">
+          </div>
+          <div class="field">
+            <label>سعر الطن <span class="unit">EGP/Ton</span></label>
+            <input type="number" value="${layer.tonPrice}" step="500" oninput="updateLayerField('${side}', ${layer.id}, 'tonPrice', this.value)">
+          </div>
+        </div>`;
+    } else if (t === 'paper_print'){
+      fields = `
+        <div class="layer-fields">
+          <div class="field">
+            <label>وزن المتر <span class="unit">جم/م²</span></label>
+            <input type="number" value="${layer.gsm}" step="5" oninput="updateLayerField('${side}', ${layer.id}, 'gsm', this.value)">
+          </div>
+          <div class="field">
+            <label>سعر الطن <span class="unit">EGP/Ton</span></label>
+            <input type="number" value="${layer.tonPrice}" step="500" oninput="updateLayerField('${side}', ${layer.id}, 'tonPrice', this.value)">
+          </div>
+        </div>
+        <div class="layer-fields-3">
+          <div class="field">
+            <label>عدد الألوان <span class="unit">Color</span></label>
+            <input type="number" value="${layer.colors}" min="0" max="8" step="1" oninput="updateLayerField('${side}', ${layer.id}, 'colors', this.value)">
+          </div>
+          <div class="field">
+            <label>سعر اللون/فرخ <span class="unit">EGP</span></label>
+            <input type="number" value="${layer.pricePerColor}" step="0.05" oninput="updateLayerField('${side}', ${layer.id}, 'pricePerColor', this.value)">
+          </div>
+        </div>`;
+    }
+
+    return `
+      <div class="layer-card${side === 'back' ? ' back' : ''}">
+        <div class="layer-header">
+          <span class="layer-num">${idx + 1}</span>
+          <select onchange="changeLayerType('${side}', ${layer.id}, this.value)">
+            ${Object.entries(LAYER_TYPES).map(([k, v]) =>
+              `<option value="${k}" ${layer.type === k ? 'selected' : ''}>${v.label}</option>`
+            ).join('')}
+          </select>
+          <button class="del-layer" onclick="removeLayer('${side}', ${layer.id})" title="حذف الطبقة">×</button>
+        </div>
+        ${fields}
+      </div>`;
+  }).join('');
+}
+
+// ============================================
+// READ MATERIAL COST/WEIGHT for a side (sum all layers)
+// ============================================
+function readSide(side){
+  const layers = side === 'face' ? STATE.faceLayers : STATE.backLayers;
+  let totalWeight = 0;     // grams per current sheet
+  let totalCost = 0;       // EGP per current sheet
+  let totalPrintCost = 0;  // print cost per sheet
+  let machineCostBase = 0; // sum of metalize/selophane layer costs (for machine % calc)
+  const breakdown = [];
+
+  const areaM2 = sheetAreaM2();
+
+  layers.forEach((layer, idx) => {
+    let w = 0, c = 0, printC = 0;
+    if (layer.type === 'metalize' || layer.type === 'selophane'){
+      const micron = +layer.micron || 0;
+      const price = +layer.price || 0;
+      const gsm = micron * PET_DENSITY;
+      w = gsm * areaM2; // g per current sheet
+      c = (w / 1000) * price;
+      machineCostBase += c;
+    } else if (layer.type === 'paper_plain'){
+      const gsm = +layer.gsm || 0;
+      const tonPrice = +layer.tonPrice || 0;
+      w = gsm * areaM2;
+      c = (w / 1000) * (tonPrice / 1000);
+    } else if (layer.type === 'paper_print'){
+      const gsm = +layer.gsm || 0;
+      const tonPrice = +layer.tonPrice || 0;
+      const colors = +layer.colors || 0;
+      const pricePerColor = +layer.pricePerColor || 0;
+      w = gsm * areaM2;
+      c = (w / 1000) * (tonPrice / 1000);
+      printC = colors * pricePerColor;
+      totalPrintCost += printC;
+    }
+    totalWeight += w;
+    totalCost += c;
+    breakdown.push({
+      layerNum: idx + 1,
+      type: layer.type,
+      label: LAYER_TYPES[layer.type].label,
+      weight: w,
+      cost: c,
+      printCost: printC
+    });
+  });
+
+  return {totalWeight, totalCost, totalPrintCost, machineCostBase, breakdown, count: layers.length};
+}
+
+// ============================================
+// READ ALL INPUTS
+// ============================================
+function readInputs(){
+  // Sheet size (current)
+  const SHEET_W = sheetW();
+  const SHEET_H = sheetH();
+  const SHEET_AREA = sheetAreaCm2();
+  const areaRatio = sheetAreaRatio(); // current / standard 70x100
+
+  // Update sheet size hint
+  const hintEl = $('sheetAreaHint');
+  if (hintEl) hintEl.textContent = `المساحة: ${SHEET_AREA} سم² (${(SHEET_AREA/10000).toFixed(2)} م²)`;
+  const lblEl = $('sheetSizeLabel');
+  if (lblEl) lblEl.textContent = `${SHEET_W} × ${SHEET_H} cm`;
+
+  // Karton: bale 25kg gives N standard sheets (70x100). 
+  // For current sheet size, weight scales by area ratio.
+  const balePrice = +$('balePrice').value || 0;
+  const kartonNumber = +$('kartonNumber').value || 25;
+  const stdSheetWeight = 25000 / kartonNumber; // g for 70x100
+  const sheetWeightKarton = stdSheetWeight * areaRatio; // adjusted for current size
+  const stdSheetPrice = balePrice / kartonNumber;
+  const sheetPriceKarton = stdSheetPrice * areaRatio;
+
+  $('sheetWeight').value = fmt(sheetWeightKarton, 0);
+  $('sheetPrice').value = fmt(sheetPriceKarton, 2);
+
+  const face = readSide('face');
+  const back = readSide('back');
+
+  const lasqFacePrice = +$('lasqFacePrice').value || 0;
+  const lasqBackPrice = +$('lasqBackPrice').value || 0;
+  // lasq applied only if there's at least one layer on that side
+  const lasqCost = (face.count > 0 ? lasqFacePrice : 0) + (back.count > 0 ? lasqBackPrice : 0);
+
+  const bosmaPrice = +$('bosmaPrice').value || 0;
+  const cuttingPrice = +$('cuttingPrice').value || 0;
+  const machinePctOfFace = +$('machinePctOfFace').value || 0;
+
+  // Machine cost = % of all metalize/selophane layers cost
+  const machineCost = (face.machineCostBase + back.machineCostBase) * (machinePctOfFace / 100);
+
+  const silicateGrams = +$('silicateGrams').value || 0;
+  const silicatePrice = +$('silicatePrice').value || 0;
+  const silicateCostSheet = (silicateGrams / 1000) * silicatePrice;
+
+  const wastePrice = +$('wastePrice').value || 0;
+  const overheadPct = +$('overheadPct').value || 0;
+  const profitPct = +$('profitPct').value || 0;
+
+  // Print costs from face/back
+  const printCostSheet = face.totalPrintCost + back.totalPrintCost;
+
+  // Materials cost per sheet
+  const materialsCost = sheetPriceKarton + face.totalCost + back.totalCost + silicateCostSheet + printCostSheet;
+
+  // Process cost per sheet
+  const processCost = lasqCost + bosmaPrice + cuttingPrice + machineCost;
+
+  // Total sheet weight
+  const totalSheetWeight = sheetWeightKarton + face.totalWeight + back.totalWeight + silicateGrams;
+
+  return {
+    SHEET_W, SHEET_H, SHEET_AREA,
+    balePrice, kartonNumber, sheetWeightKarton, sheetPriceKarton,
+    face, back,
+    lasqFacePrice, lasqBackPrice, lasqCost,
+    bosmaPrice, cuttingPrice, machinePctOfFace, machineCost,
+    silicateGrams, silicatePrice, silicateCostSheet,
+    wastePrice, overheadPct, profitPct,
+    printCostSheet, materialsCost, processCost,
+    totalSheetWeight,
+    totalDirectCost: materialsCost + processCost
+  };
+}
+
+// ============================================
+// PACKING (single shape) - uses dynamic sheet size
+// ============================================
+function packPieces(shape, dim){
+  const SHEET_W = sheetW();
+  const SHEET_H = sheetH();
+  const usableW = SHEET_W - 2*MARGIN;
+  const usableH = SHEET_H - 2*MARGIN;
+
+  if (shape === 'circle'){
+    const d = dim.diameter;
+    if (d <= 0 || d > usableW || d > usableH) return {count:0, layout:[], pieceArea:0, shape};
+    const pitch = d + GAP;
+    const sqCols = Math.floor((usableW + GAP) / pitch);
+    const sqRows = Math.floor((usableH + GAP) / pitch);
+    const sqCount = sqCols * sqRows;
+
+    const hexRowPitch = pitch * Math.sqrt(3) / 2;
+    const hexRows = Math.floor((usableH - d) / hexRowPitch) + 1;
+    let hexCount = 0;
+    const hexLayout = [];
+    for (let r=0; r<hexRows; r++){
+      const yOff = r * hexRowPitch;
+      const xShift = (r % 2) * (pitch/2);
+      const availW = usableW - xShift;
+      const cols = Math.floor((availW - d) / pitch) + 1;
+      for (let c=0; c<cols; c++){
+        if (cols < 1) continue;
+        hexLayout.push({
+          x: MARGIN + xShift + c*pitch + d/2,
+          y: MARGIN + yOff + d/2,
+          d
+        });
+        hexCount++;
+      }
+    }
+
+    if (hexCount > sqCount){
+      return {count:hexCount, layout:hexLayout, pieceArea: Math.PI*(d/2)**2, shape};
+    } else {
+      const layout = [];
+      for (let r=0; r<sqRows; r++){
+        for (let c=0; c<sqCols; c++){
+          layout.push({x: MARGIN + c*pitch + d/2, y: MARGIN + r*pitch + d/2, d});
+        }
+      }
+      return {count:sqCount, layout, pieceArea: Math.PI*(d/2)**2, shape};
+    }
+  }
+
+  const w = shape === 'square' ? dim.side : dim.width;
+  const h = shape === 'square' ? dim.side : dim.length;
+
+  function tryPack(pw, ph){
+    if (pw > usableW || ph > usableH) return {count:0, cols:0, rows:0, pw, ph};
+    const cols = Math.floor((usableW + GAP) / (pw + GAP));
+    const rows = Math.floor((usableH + GAP) / (ph + GAP));
+    return {count:Math.max(0, cols*rows), cols, rows, pw, ph};
+  }
+  const a = tryPack(w, h);
+  const b = tryPack(h, w);
+  const best = a.count >= b.count ? a : b;
+  const layout = [];
+  for (let r=0; r<best.rows; r++){
+    for (let c=0; c<best.cols; c++){
+      layout.push({x: MARGIN + c*(best.pw+GAP), y: MARGIN + r*(best.ph+GAP), w:best.pw, h:best.ph});
+    }
+  }
+  return {count:best.count, layout, pieceArea: w*h, shape};
+}
+
+// ============================================
+// CALCULATE COST FOR A SINGLE PIECE
+// ============================================
+function calculatePiece(shape, dims){
+  const inp = readInputs();
+  const pack = packPieces(shape, dims);
+  if (pack.count === 0) return {error: 'المقاس أكبر من الفرخ المتاح بعد الهامش!', inp};
+
+  const SHEET_AREA = inp.SHEET_AREA;
+  const totalPiecesArea = pack.count * pack.pieceArea;
+  const wasteArea = SHEET_AREA - totalPiecesArea;
+  const utilization = (totalPiecesArea / SHEET_AREA) * 100;
+
+  const pieceWeight = inp.totalSheetWeight * (pack.pieceArea / SHEET_AREA);
+  const usedWeight = pack.count * pieceWeight; // total weight of pieces produced from a sheet
+  const wasteWeight = inp.totalSheetWeight * (wasteArea / SHEET_AREA);
+
+  const wasteRefundSheet = (wasteWeight / 1000) * inp.wastePrice;
+  const netCostSheet = inp.totalDirectCost - wasteRefundSheet;
+  const overheadCostSheet = netCostSheet * (inp.overheadPct / 100);
+  const finalCostSheet = netCostSheet + overheadCostSheet;
+
+  const costPerPiece = finalCostSheet / pack.count;
+  const profitPerPiece = costPerPiece * (inp.profitPct / 100);
+  const sellingPrice = costPerPiece + profitPerPiece;
+  const pricePerKg = (sellingPrice / pieceWeight) * 1000;
+
+  return {
+    inp, pack, totalPiecesArea, wasteArea, utilization,
+    pieceWeight, usedWeight, wasteWeight,
+    wasteRefundSheet, netCostSheet, overheadCostSheet, finalCostSheet,
+    costPerPiece, profitPerPiece, sellingPrice, pricePerKg,
+    materialsCost: inp.materialsCost, processCost: inp.processCost,
+    totalDirectCost: inp.totalDirectCost,
+    machineCost: inp.machineCost
+  };
+}
+
+// ============================================
+// RENDER SINGLE
+// ============================================
+function getCurrentDims(){
+  if (STATE.shape === 'circle') return {diameter: +$('diameter').value || 0};
+  if (STATE.shape === 'square') return {side: +$('sqSide').value || 0};
+  return {length: +$('rectL').value || 0, width: +$('rectW').value || 0};
+}
+
+function renderSingle(){
+  const dims = getCurrentDims();
+  const r = calculatePiece(STATE.shape, dims);
+
+  if (r.error){
+    $('breakdown').innerHTML = `<div style="padding:18px;background:#fbe9e6;color:var(--danger);border-radius:8px;text-align:center;font-weight:700">${r.error}</div>`;
+    ['piecesPerSheet','utilization','pieceWeight','wasteWeight','wasteValue','pricePerPiece'].forEach(id=>$(id).innerHTML = '—');
+    $('resultPricePill').textContent = '— EGP/KG';
+    drawLayout($('layoutSvg'), {count:0, layout:[], shape:STATE.shape});
+    return;
+  }
+
+  $('piecesPerSheet').textContent = r.pack.count;
+  $('utilization').innerHTML = `${fmt(r.utilization,1)}<span class="stat-unit">%</span>`;
+  $('pieceWeight').innerHTML = `${fmt(r.pieceWeight,1)}<span class="stat-unit">جم</span>`;
+  $('wasteWeight').innerHTML = `${fmt(r.wasteWeight,1)}<span class="stat-unit">جم</span>`;
+  $('wasteValue').innerHTML = `${fmt(r.wasteRefundSheet,2)}<span class="stat-unit">EGP/فرخ</span>`;
+  $('pricePerPiece').innerHTML = `${fmt(r.sellingPrice,2)}<span class="stat-unit">EGP</span>`;
+  $('resultPricePill').textContent = `${fmt(r.pricePerKg,2)} EGP/KG`;
+
+  const inp = r.inp;
+
+  // Layer breakdown HTML
+  const faceLayersHtml = inp.face.breakdown.map(b =>
+    `<div class="breakdown-row"><span style="padding-right:14px">↳ وجه ${b.layerNum}: ${b.label} (${fmt(b.weight,1)} جم)</span><span class="amount">${fmt(b.cost + b.printCost,2)} ج</span></div>`
+  ).join('');
+  const backLayersHtml = inp.back.breakdown.map(b =>
+    `<div class="breakdown-row"><span style="padding-right:14px">↳ ضهر ${b.layerNum}: ${b.label} (${fmt(b.weight,1)} جم)</span><span class="amount">${fmt(b.cost + b.printCost,2)} ج</span></div>`
+  ).join('');
+
+  $('breakdown').innerHTML = `
+    <div class="breakdown-row"><span>كارتون (نمرة ${inp.kartonNumber}, ${inp.SHEET_W}×${inp.SHEET_H} cm, ${fmt(inp.sheetWeightKarton,0)} جم)</span><span class="amount">${fmt(inp.sheetPriceKarton,2)} ج</span></div>
+    ${faceLayersHtml || '<div class="breakdown-row" style="color:var(--muted)"><span>الوجه: لا توجد طبقات</span><span>—</span></div>'}
+    ${backLayersHtml || '<div class="breakdown-row" style="color:var(--muted)"><span>الضهر: لا توجد طبقات</span><span>—</span></div>'}
+    <div class="breakdown-row"><span>سيليكات (${inp.silicateGrams} جم)</span><span class="amount">${fmt(inp.silicateCostSheet,2)} ج</span></div>
+    <div class="breakdown-row subtotal"><span>إجمالي المواد للفرخ</span><span class="amount">${fmt(inp.materialsCost,2)} ج</span></div>
+    ${inp.face.count > 0 ? `<div class="breakdown-row"><span>لصق الوجه</span><span class="amount">${fmt(inp.lasqFacePrice,2)} ج</span></div>` : ''}
+    ${inp.back.count > 0 ? `<div class="breakdown-row"><span>لصق الضهر</span><span class="amount">${fmt(inp.lasqBackPrice,2)} ج</span></div>` : ''}
+    ${inp.bosmaPrice>0?`<div class="breakdown-row"><span>بصمة</span><span class="amount">${fmt(inp.bosmaPrice,2)} ج</span></div>`:''}
+    <div class="breakdown-row"><span>تكسير</span><span class="amount">${fmt(inp.cuttingPrice,2)} ج</span></div>
+    ${inp.machineCost>0?`<div class="breakdown-row"><span>مصنعية ماكينة (${inp.machinePctOfFace}%)</span><span class="amount">${fmt(inp.machineCost,2)} ج</span></div>`:''}
+    <div class="breakdown-row subtotal"><span>إجمالي العمليات</span><span class="amount">${fmt(inp.processCost,2)} ج</span></div>
+    <div class="breakdown-row subtotal"><span>التكلفة المباشرة للفرخ</span><span class="amount">${fmt(r.totalDirectCost,2)} ج</span></div>
+    <div class="breakdown-row refund"><span>− عائد الهالك (${fmt(r.wasteWeight,0)} جم)</span><span class="amount">−${fmt(r.wasteRefundSheet,2)} ج</span></div>
+    <div class="breakdown-row"><span>+ مصاريف غير مباشرة (${inp.overheadPct}%)</span><span class="amount">+${fmt(r.overheadCostSheet,2)} ج</span></div>
+    <div class="breakdown-row subtotal"><span>التكلفة النهائية للفرخ</span><span class="amount">${fmt(r.finalCostSheet,2)} ج</span></div>
+    <div class="breakdown-row"><span>التكلفة لكل قاعدة (÷ ${r.pack.count})</span><span class="amount">${fmt(r.costPerPiece,3)} ج</span></div>
+    <div class="breakdown-row"><span>+ هامش الربح (${inp.profitPct}%)</span><span class="amount">+${fmt(r.profitPerPiece,3)} ج</span></div>
+    <div class="breakdown-row total"><span>سعر البيع للقاعدة</span><span class="amount">${fmt(r.sellingPrice,2)} ج</span></div>
+    <div class="breakdown-row total" style="background:var(--gold);color:var(--ink)"><span>سعر الكيلو</span><span class="amount">${fmt(r.pricePerKg,2)} ج/كجم</span></div>
+  `;
+
+  // Add usage summary
+  const usageHtml = `
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:9px;margin-top:12px;padding:11px;background:var(--bg);border:1px solid var(--line);border-radius:8px">
+      <div><div style="font-size:10.5px;color:var(--muted);font-weight:600;text-transform:uppercase">المستغل (مساحة)</div><div style="font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:700;direction:ltr;text-align:right">${fmt(r.totalPiecesArea,0)} cm²</div></div>
+      <div><div style="font-size:10.5px;color:var(--muted);font-weight:600;text-transform:uppercase">المستغل (وزن)</div><div style="font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:700;direction:ltr;text-align:right;color:var(--green)">${fmt(r.usedWeight,1)} جم</div></div>
+      <div><div style="font-size:10.5px;color:var(--muted);font-weight:600;text-transform:uppercase">الهالك (مساحة)</div><div style="font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:700;direction:ltr;text-align:right">${fmt(r.wasteArea,0)} cm²</div></div>
+      <div><div style="font-size:10.5px;color:var(--muted);font-weight:600;text-transform:uppercase">الهالك (وزن)</div><div style="font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:700;direction:ltr;text-align:right;color:var(--warning)">${fmt(r.wasteWeight,1)} جم</div></div>
+    </div>
+  `;
+  $('breakdown').insertAdjacentHTML('beforeend', usageHtml);
+
+  renderWarnings(r);
+  $('fullDetails').textContent = buildDetailsReport(r, dims);
+  drawLayout($('layoutSvg'), r.pack);
+}
+
+function materialLabel(t){
+  if (LAYER_TYPES[t]) return LAYER_TYPES[t].label;
+  return {none:'بدون'}[t] || t;
+}
+
+function buildDetailsReport(r, dims){
+  const inp = r.inp;
+  const faceDetails = inp.face.breakdown.length > 0 ?
+    inp.face.breakdown.map(b => `    [${b.layerNum}] ${b.label.padEnd(12)} ${fmt(b.weight,1).padStart(7)}g  ${fmt(b.cost+b.printCost,2).padStart(7)} EGP`).join('\n') :
+    '    (no layers)';
+  const backDetails = inp.back.breakdown.length > 0 ?
+    inp.back.breakdown.map(b => `    [${b.layerNum}] ${b.label.padEnd(12)} ${fmt(b.weight,1).padStart(7)}g  ${fmt(b.cost+b.printCost,2).padStart(7)} EGP`).join('\n') :
+    '    (no layers)';
+
+  return `
+═══════════════════════════════════════════
+  CAKE BASE COST REPORT
+═══════════════════════════════════════════
+
+INPUT:
+  Sheet            ${inp.SHEET_W} × ${inp.SHEET_H} cm (${inp.SHEET_AREA} cm²)
+  Shape            ${STATE.shape}
+  Dimensions       ${JSON.stringify(dims)}
+
+KARTON:
+  No.              ${inp.kartonNumber}
+  Sheet weight     ${fmt(inp.sheetWeightKarton,1)} g
+  Sheet price      ${fmt(inp.sheetPriceKarton,2)} EGP
+
+FACE LAYERS (${inp.face.count}):
+${faceDetails}
+  Total face wt    ${fmt(inp.face.totalWeight,1)} g
+  Total face cost  ${fmt(inp.face.totalCost + inp.face.totalPrintCost,2)} EGP
+
+BACK LAYERS (${inp.back.count}):
+${backDetails}
+  Total back wt    ${fmt(inp.back.totalWeight,1)} g
+  Total back cost  ${fmt(inp.back.totalCost + inp.back.totalPrintCost,2)} EGP
+
+OTHER MATERIALS:
+  Silicate         ${fmt(inp.silicateGrams,0)} g  → ${fmt(inp.silicateCostSheet,2)} EGP
+
+  TOTAL SHEET WT   ${fmt(inp.totalSheetWeight,1)} g
+
+PACKING (margin 1cm, gap 1cm):
+  Pieces / sheet   ${r.pack.count}
+  Piece area       ${fmt(r.pack.pieceArea,2)} cm²
+  USED area        ${fmt(r.totalPiecesArea,2)} cm²
+  USED weight      ${fmt(r.usedWeight,2)} g
+  WASTE area       ${fmt(r.wasteArea,2)} cm²
+  WASTE weight     ${fmt(r.wasteWeight,2)} g
+  Utilization      ${fmt(r.utilization,2)} %
+
+PROCESS COSTS / SHEET:
+  Lasq face        ${fmt(inp.face.count > 0 ? inp.lasqFacePrice : 0, 2)}
+  Lasq back        ${fmt(inp.back.count > 0 ? inp.lasqBackPrice : 0, 2)}
+  Bosma            ${fmt(inp.bosmaPrice,2)}
+  Cutting          ${fmt(inp.cuttingPrice,2)}
+  Machine ${inp.machinePctOfFace}%      ${fmt(inp.machineCost,2)}
+
+COST / SHEET:
+  Materials        ${fmt(inp.materialsCost,2)} EGP
+  Process          ${fmt(inp.processCost,2)} EGP
+  Direct           ${fmt(r.totalDirectCost,2)} EGP
+  − Waste refund   ${fmt(r.wasteRefundSheet,2)} EGP
+  + Overhead       ${fmt(r.overheadCostSheet,2)} EGP (${inp.overheadPct}%)
+  Final / sheet    ${fmt(r.finalCostSheet,2)} EGP
+
+PER PIECE:
+  Cost             ${fmt(r.costPerPiece,3)} EGP
+  Profit (${inp.profitPct}%)     ${fmt(r.profitPerPiece,3)} EGP
+  Selling          ${fmt(r.sellingPrice,3)} EGP
+  Price / KG       ${fmt(r.pricePerKg,2)} EGP
+═══════════════════════════════════════════
+`;
+}
+
+// ============================================
+// WARNINGS
+// ============================================
+function renderWarnings(r){
+  const warns = [];
+  if (r.utilization < 50) warns.push(`نسبة الاستغلال منخفضة (${fmt(r.utilization,1)}%) — هالك مرتفع، فكر في مقاس آخر`);
+  if (r.utilization > 85) warns.push(`نسبة الاستغلال ممتازة (${fmt(r.utilization,1)}%)! استفادة كاملة من الفرخ`);
+  if (r.inp.face.count === 0 && r.inp.back.count === 0) warns.push('لم يتم إضافة أي طبقات وجه أو ضهر — التكلفة تشمل الكارتون فقط');
+  if (r.pricePerKg < 30 && r.pricePerKg > 0) warns.push(`سعر الكيلو منخفض جداً (${fmt(r.pricePerKg,1)} ج) — راجع الأسعار والربح`);
+  if (r.profitPerPiece < 0.1 && r.sellingPrice > 0) warns.push('هامش الربح للقطعة الواحدة ضعيف جداً');
+
+  if (warns.length === 0){
+    $('warningsBox').innerHTML = '';
+    return;
+  }
+  $('warningsBox').innerHTML = `
+    <div class="warnings">
+      <h4>⚠ ملاحظات</h4>
+      <ul>${warns.map(w=>`<li>${w}</li>`).join('')}</ul>
+    </div>`;
+}
+
+// ============================================
+// DRAW LAYOUT
+// ============================================
+function drawLayout(svg, pack, options={}){
+  const SHEET_W_LOC = sheetW();
+  const SHEET_H_LOC = sheetH();
+  // Auto-scale to fit: max width ~420px
+  const maxW = 420, maxH = 540;
+  let SCALE = Math.min(maxW / SHEET_W_LOC, maxH / SHEET_H_LOC);
+  if (options.scale) SCALE = options.scale;
+
+  const padX = 30, padY = 30;
+  const W = SHEET_W_LOC * SCALE, H = SHEET_H_LOC * SCALE;
+  svg.setAttribute('viewBox', `0 0 ${W + 60} ${H + 60}`);
+
+  let html = `<defs>
+    <linearGradient id="goldGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f5d985"/>
+      <stop offset="100%" stop-color="#c8a050"/>
+    </linearGradient>
+    <linearGradient id="silverGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#e8e8e8"/>
+      <stop offset="100%" stop-color="#a0a0a0"/>
+    </linearGradient>
+    <linearGradient id="paperGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fbf6e8"/>
+      <stop offset="100%" stop-color="#e9dcb0"/>
+    </linearGradient>
+    <pattern id="grid" width="${SCALE}" height="${SCALE}" patternUnits="userSpaceOnUse">
+      <path d="M ${SCALE} 0 L 0 0 0 ${SCALE}" fill="none" stroke="#ece7d8" stroke-width="0.5"/>
+    </pattern>
+  </defs>`;
+
+  html += `<rect x="${padX}" y="${padY}" width="${W}" height="${H}" fill="url(#grid)" stroke="#1a1a1a" stroke-width="1.5" rx="4"/>`;
+  const m = MARGIN * SCALE;
+  html += `<rect x="${padX+m}" y="${padY+m}" width="${W-2*m}" height="${H-2*m}" fill="none" stroke="#b8893a" stroke-width="0.7" stroke-dasharray="3 3" opacity="0.6"/>`;
+
+  // Determine fill based on TOP face layer
+  const topFaceLayer = STATE.faceLayers[0];
+  let fill = 'url(#goldGrad)';
+  let stroke = '#8a6520';
+  if (topFaceLayer){
+    if (topFaceLayer.type === 'selophane'){ fill = 'url(#silverGrad)'; stroke='#666'; }
+    else if (topFaceLayer.type === 'paper_plain' || topFaceLayer.type === 'paper_print'){ fill = 'url(#paperGrad)'; stroke='#a08a4a'; }
+  } else {
+    fill = '#f5f0e0'; stroke='#999';
+  }
+
+  pack.layout.forEach(p=>{
+    if (p.d){
+      html += `<circle cx="${padX + p.x*SCALE}" cy="${padY + p.y*SCALE}" r="${(p.d/2)*SCALE}" fill="${p.fill||fill}" stroke="${p.stroke||stroke}" stroke-width="0.8"/>`;
+    } else {
+      html += `<rect x="${padX + p.x*SCALE}" y="${padY + p.y*SCALE}" width="${p.w*SCALE}" height="${p.h*SCALE}" fill="${p.fill||fill}" stroke="${p.stroke||stroke}" stroke-width="0.8" rx="2"/>`;
+    }
+  });
+
+  html += `<text x="${padX + W/2}" y="${padY - 8}" text-anchor="middle" font-size="11" font-family="IBM Plex Mono" fill="#1a1a1a" font-weight="700">${SHEET_W_LOC} cm</text>`;
+  html += `<text x="${padX - 10}" y="${padY + H/2}" text-anchor="middle" font-size="11" font-family="IBM Plex Mono" fill="#1a1a1a" font-weight="700" transform="rotate(-90 ${padX-10} ${padY + H/2})">${SHEET_H_LOC} cm</text>`;
+  html += `<text x="${padX + W - 5}" y="${padY + H + 18}" text-anchor="end" font-size="10" font-family="IBM Plex Mono" fill="#6b6b6b">${pack.count} قطعة / فرخ</text>`;
+
+  svg.innerHTML = html;
+}
+
+// ============================================
+// MULTI-SHEET PACKING (different sizes)
+// ============================================
+function packMultiplePieces(pieces){
+  const SHEET_W_LOC = sheetW();
+  const SHEET_H_LOC = sheetH();
+  const items = [];
+  pieces.forEach((p, idx)=>{
+    let w, h;
+    if (p.shape === 'circle'){ w = p.dims.diameter; h = p.dims.diameter; }
+    else if (p.shape === 'square'){ w = p.dims.side; h = p.dims.side; }
+    else { w = p.dims.length; h = p.dims.width; }
+    items.push({...p, w, h, idx, area: w*h});
+  });
+
+  const usableW = SHEET_W_LOC - 2*MARGIN;
+  const usableH = SHEET_H_LOC - 2*MARGIN;
+
+  const sorted = [...items].sort((a,b)=> b.h - a.h);
+  let bestLayout = null;
+  let bestUsedArea = 0;
+
+  for (let trial = 0; trial < 4; trial++){
+    const order = trial === 0 ? sorted :
+                  trial === 1 ? [...items].sort((a,b)=> b.area - a.area) :
+                  trial === 2 ? [...items].sort((a,b)=> b.w - a.w) :
+                  [...items];
+
+    const placed = [];
+    const counts = {};
+    items.forEach(it=> counts[it.idx]=0);
+
+    let shelfY = 0;
+    let shelfH = 0;
+    let xCursor = 0;
+
+    function startNewShelf(h){
+      shelfY += shelfH + (shelfH > 0 ? GAP : 0);
+      shelfH = h;
+      xCursor = 0;
+    }
+
+    for (const item of order){
+      if (counts[item.idx] >= (item.qty || 9999)) continue;
+      const tryItem = (w, h, rotated) => {
+        if (w > usableW || h > usableH) return false;
+        if (xCursor + w > usableW){
+          startNewShelf(h);
+        }
+        if (shelfY + h > usableH) return false;
+        if (h > shelfH) shelfH = h;
+        placed.push({x: MARGIN + xCursor, y: MARGIN + shelfY, w, h, item, rotated});
+        xCursor += w + GAP;
+        counts[item.idx]++;
+        return true;
+      };
+      if (!tryItem(item.w, item.h, false)){
+        tryItem(item.h, item.w, true);
+      }
+    }
+
+    let madeProgress = true;
+    while (madeProgress){
+      madeProgress = false;
+      for (const item of order){
+        if (counts[item.idx] >= (item.qty || 9999)) continue;
+        const tryItem = (w, h, rotated) => {
+          if (w > usableW || h > usableH) return false;
+          if (xCursor + w <= usableW && shelfY + h <= usableH && h <= shelfH){
+            placed.push({x: MARGIN + xCursor, y: MARGIN + shelfY, w, h, item, rotated});
+            xCursor += w + GAP;
+            counts[item.idx]++;
+            return true;
+          }
+          if (shelfY + shelfH + GAP + h <= usableH && w <= usableW){
+            startNewShelf(h);
+            placed.push({x: MARGIN + xCursor, y: MARGIN + shelfY, w, h, item, rotated});
+            xCursor += w + GAP;
+            counts[item.idx]++;
+            return true;
+          }
+          return false;
+        };
+        if (tryItem(item.w, item.h, false) || tryItem(item.h, item.w, true)){
+          madeProgress = true;
+          break;
+        }
+      }
+    }
+
+    let usedArea = 0;
+    placed.forEach(p=>{
+      const it = p.item;
+      const a = it.shape === 'circle' ? Math.PI*(it.w/2)**2 : it.w*it.h;
+      usedArea += a;
+    });
+    if (usedArea > bestUsedArea){
+      bestUsedArea = usedArea;
+      bestLayout = {placed, counts, items};
+    }
+  }
+
+  return bestLayout || {placed:[], counts:{}, items};
+}
+
+// ============================================
+// MULTI-SHEET TAB
+// ============================================
+const MULTI_COLORS = ['#d4a85a','#7a9bbf','#b86b6b','#7a9b6b','#a07ab8','#c8a050','#5b8a8a','#c87a4a'];
+
+function addMultiPiece(data){
+  const list = $('multiPiecesList');
+  const d = data || {shape:'circle', a:25, b:0, qty:'auto', label:''};
+  const id = Date.now() + Math.random();
+  const idx = list.children.length;
+  const color = MULTI_COLORS[idx % MULTI_COLORS.length];
+  const row = document.createElement('div');
+  row.className = 'multi-piece-item';
+  row.dataset.id = id;
+  row.dataset.color = color;
+  row.innerHTML = `
+    <div style="display:flex;align-items:center;gap:6px">
+      <span style="width:14px;height:14px;background:${color};border-radius:3px;flex-shrink:0"></span>
+      <select class="ms-shape">
+        <option value="circle" ${d.shape==='circle'?'selected':''}>دائرية</option>
+        <option value="square" ${d.shape==='square'?'selected':''}>مربعة</option>
+        <option value="rectangle" ${d.shape==='rectangle'?'selected':''}>مستطيلة</option>
+      </select>
+    </div>
+    <input type="number" class="ms-a" placeholder="مقاس" value="${d.a}" step="1">
+    <input type="number" class="ms-b" placeholder="عرض" value="${d.b}" step="1" ${d.shape!=='rectangle'?'style="visibility:hidden" data-hidden="true"':''}>
+    <input type="number" class="ms-qty" placeholder="حد أقصى" value="${d.qty==='auto'?'':d.qty}" step="1" min="1" title="حد أقصى من القطعة (فارغ = أكبر عدد ممكن)">
+    <input type="text" class="ms-label" placeholder="اسم/كود (اختياري)" value="${d.label||''}">
+    <button class="del" title="حذف">×</button>
+  `;
+  row.querySelector('.ms-shape').addEventListener('change', e=>{
+    const msbEl = row.querySelector('.ms-b');
+    msbEl.style.visibility = e.target.value === 'rectangle' ? 'visible' : 'hidden';
+    if (e.target.value === 'rectangle') msbEl.removeAttribute('data-hidden'); else msbEl.setAttribute('data-hidden','true');
+  });
+  row.querySelector('.del').addEventListener('click', ()=>row.remove());
+  list.appendChild(row);
+}
+
+function calculateMultiSheet(){
+  const rows = document.querySelectorAll('#multiPiecesList .multi-piece-item');
+  if (rows.length === 0){ toast('أضف مقاسات أولاً', 'error'); return; }
+
+  const pieces = [];
+  rows.forEach((row, idx)=>{
+    const shape = row.querySelector('.ms-shape').value;
+    const a = +row.querySelector('.ms-a').value || 0;
+    const b = +row.querySelector('.ms-b').value || 0;
+    const qtyVal = row.querySelector('.ms-qty').value;
+    const qty = qtyVal === '' ? 9999 : (+qtyVal || 9999);
+    const label = row.querySelector('.ms-label').value || `قطعة ${idx+1}`;
+    const color = row.dataset.color;
+    let dims;
+    if (shape === 'circle') dims = {diameter:a};
+    else if (shape === 'square') dims = {side:a};
+    else dims = {length:a, width:b};
+    if (a > 0) pieces.push({shape, dims, qty, label, color, idx});
+  });
+
+  if (pieces.length === 0){ toast('أدخل مقاسات صحيحة', 'error'); return; }
+
+  const result = packMultiplePieces(pieces);
+
+  // Draw with dynamic sheet size
+  const SHEET_W_LOC = sheetW();
+  const SHEET_H_LOC = sheetH();
+  const svg = $('multiLayoutSvg');
+  const maxW = 420, maxH = 540;
+  const SCALE = Math.min(maxW / SHEET_W_LOC, maxH / SHEET_H_LOC);
+  const padX = 30, padY = 30;
+  const W = SHEET_W_LOC * SCALE, H = SHEET_H_LOC * SCALE;
+  svg.setAttribute('viewBox', `0 0 ${W + 60} ${H + 60}`);
+
+  let html = `<defs>
+    <pattern id="gridM" width="${SCALE}" height="${SCALE}" patternUnits="userSpaceOnUse">
+      <path d="M ${SCALE} 0 L 0 0 0 ${SCALE}" fill="none" stroke="#ece7d8" stroke-width="0.5"/>
+    </pattern>
+  </defs>`;
+  html += `<rect x="${padX}" y="${padY}" width="${W}" height="${H}" fill="url(#gridM)" stroke="#1a1a1a" stroke-width="1.5" rx="4"/>`;
+  const m = MARGIN * SCALE;
+  html += `<rect x="${padX+m}" y="${padY+m}" width="${W-2*m}" height="${H-2*m}" fill="none" stroke="#b8893a" stroke-width="0.7" stroke-dasharray="3 3" opacity="0.6"/>`;
+
+  result.placed.forEach(p=>{
+    const it = p.item;
+    const x = padX + p.x*SCALE;
+    const y = padY + p.y*SCALE;
+    const w = p.w*SCALE;
+    const h = p.h*SCALE;
+    if (it.shape === 'circle'){
+      html += `<circle cx="${x + w/2}" cy="${y + h/2}" r="${w/2}" fill="${it.color}" fill-opacity="0.55" stroke="${it.color}" stroke-width="1.2"/>`;
+    } else {
+      html += `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${it.color}" fill-opacity="0.55" stroke="${it.color}" stroke-width="1.2" rx="2"/>`;
+    }
+  });
+
+  html += `<text x="${padX + W/2}" y="${padY - 8}" text-anchor="middle" font-size="11" font-family="IBM Plex Mono" fill="#1a1a1a" font-weight="700">${SHEET_W_LOC} cm</text>`;
+  html += `<text x="${padX - 10}" y="${padY + H/2}" text-anchor="middle" font-size="11" font-family="IBM Plex Mono" fill="#1a1a1a" font-weight="700" transform="rotate(-90 ${padX-10} ${padY + H/2})">${SHEET_H_LOC} cm</text>`;
+  svg.innerHTML = html;
+
+  const inp = readInputs();
+  let totalUsedArea = 0;
+  const itemAreas = {};
+  result.placed.forEach(p=>{
+    const it = p.item;
+    const a = it.shape === 'circle' ? Math.PI*(it.w/2)**2 : it.w*it.h;
+    totalUsedArea += a;
+    itemAreas[it.idx] = (itemAreas[it.idx]||0) + a;
+  });
+  const SHEET_AREA = inp.SHEET_AREA;
+  const wasteArea = SHEET_AREA - totalUsedArea;
+  const utilization = (totalUsedArea / SHEET_AREA) * 100;
+  const usedWeight = inp.totalSheetWeight * (totalUsedArea / SHEET_AREA);
+  const wasteWeight = inp.totalSheetWeight * (wasteArea / SHEET_AREA);
+  const wasteRefund = (wasteWeight/1000) * inp.wastePrice;
+  const netCostSheet = inp.totalDirectCost - wasteRefund;
+  const overheadSheet = netCostSheet * (inp.overheadPct/100);
+  const finalCostSheet = netCostSheet + overheadSheet;
+
+  const rows2 = pieces.map(p=>{
+    const cnt = result.counts[p.idx] || 0;
+    const itemArea = itemAreas[p.idx] || 0;
+    const itemWeight = inp.totalSheetWeight * (itemArea / SHEET_AREA);
+    const shareCost = finalCostSheet * (itemArea / SHEET_AREA);
+    const costPerPiece = cnt > 0 ? shareCost / cnt : 0;
+    const sellingPiece = costPerPiece * (1 + inp.profitPct/100);
+    const pieceWeight = cnt > 0 ? itemWeight / cnt : 0;
+    const pricePerKg = pieceWeight > 0 ? (sellingPiece / pieceWeight) * 1000 : 0;
+    return {
+      label: p.label, color: p.color, count: cnt,
+      pieceWeight, costPerPiece, sellingPiece, pricePerKg,
+      shareCost, areaShare: (itemArea/SHEET_AREA)*100
+    };
+  });
+
+  $('multiResults').innerHTML = `
+    <div class="result-grid" style="margin-top:14px">
+      <div class="stat"><div class="stat-label">قطع إجمالي</div><div class="stat-value">${result.placed.length}</div></div>
+      <div class="stat"><div class="stat-label">% الاستغلال</div><div class="stat-value">${fmt(utilization,1)}<span class="stat-unit">%</span></div></div>
+      <div class="stat green"><div class="stat-label">وزن المستغل</div><div class="stat-value">${fmt(usedWeight,1)}<span class="stat-unit">جم</span></div></div>
+      <div class="stat warning"><div class="stat-label">وزن الهالك</div><div class="stat-value">${fmt(wasteWeight,1)}<span class="stat-unit">جم</span></div></div>
+      <div class="stat green"><div class="stat-label">عائد الهالك</div><div class="stat-value">${fmt(wasteRefund,2)}<span class="stat-unit">EGP</span></div></div>
+      <div class="stat dark"><div class="stat-label">تكلفة الفرخ</div><div class="stat-value">${fmt(finalCostSheet,2)}<span class="stat-unit">EGP</span></div></div>
+    </div>
+    <div class="table-wrap" style="margin-top:14px">
+      <table>
+        <thead>
+          <tr><th>القطعة</th><th>عدد</th><th>وزن/قطعة</th><th>%مساحة</th><th>تكلفة/قطعة</th><th>سعر بيع</th><th>سعر/كيلو</th></tr>
+        </thead>
+        <tbody>
+          ${rows2.map(r=>`
+            <tr>
+              <td class="txt"><span style="display:inline-block;width:10px;height:10px;background:${r.color};border-radius:2px;margin-left:5px"></span>${r.label}</td>
+              <td>${r.count}</td>
+              <td>${fmt(r.pieceWeight,1)}</td>
+              <td>${fmt(r.areaShare,1)}%</td>
+              <td>${fmt(r.costPerPiece,2)}</td>
+              <td>${fmt(r.sellingPiece,2)}</td>
+              <td><b>${fmt(r.pricePerKg,2)}</b></td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+// ============================================
+// BATCH TAB
+// ============================================
+function addSizeRow(data){
+  const list = $('sizeList');
+  const d = data || {shape:'circle', a:25, b:0};
+  const row = document.createElement('div');
+  row.className = 'size-item';
+  row.innerHTML = `
+    <select class="ms-shape">
+      <option value="circle" ${d.shape==='circle'?'selected':''}>دائرية</option>
+      <option value="square" ${d.shape==='square'?'selected':''}>مربعة</option>
+      <option value="rectangle" ${d.shape==='rectangle'?'selected':''}>مستطيلة</option>
+    </select>
+    <input type="number" class="ms-a" placeholder="قطر/ضلع/طول" value="${d.a}" step="1">
+    <input type="number" class="ms-b" placeholder="عرض" value="${d.b||''}" step="1" ${d.shape!=='rectangle'?'style="visibility:hidden" data-hidden="true"':''}>
+    <input type="text" class="ms-label" placeholder="ملاحظة" value="${d.label||''}">
+    <span></span>
+    <button class="del" title="حذف">×</button>
+  `;
+  row.querySelector('.ms-shape').addEventListener('change', e=>{
+    const msbEl = row.querySelector('.ms-b');
+    msbEl.style.visibility = e.target.value === 'rectangle' ? 'visible' : 'hidden';
+    if (e.target.value === 'rectangle') msbEl.removeAttribute('data-hidden'); else msbEl.setAttribute('data-hidden','true');
+  });
+  row.querySelector('.del').addEventListener('click', ()=>row.remove());
+  list.appendChild(row);
+}
+
+function loadStandardSizes(){
+  $('sizeList').innerHTML = '';
+  [
+    {shape:'circle', a:18}, {shape:'circle', a:20}, {shape:'circle', a:22},
+    {shape:'circle', a:25}, {shape:'circle', a:28}, {shape:'circle', a:30},
+    {shape:'square', a:20}, {shape:'square', a:25}, {shape:'square', a:30},
+    {shape:'rectangle', a:30, b:20}, {shape:'rectangle', a:40, b:25}
+  ].forEach(s=>addSizeRow(s));
+}
+
+function calculateAllSizes(){
+  const rows = document.querySelectorAll('#sizeList .size-item');
+  if (rows.length === 0){ toast('أضف مقاسات أولاً','error'); return; }
+  const tbody = $('resultsBody');
+  tbody.innerHTML = '';
+  rows.forEach(row=>{
+    const shape = row.querySelector('.ms-shape').value;
+    const a = +row.querySelector('.ms-a').value || 0;
+    const b = +row.querySelector('.ms-b').value || 0;
+    let dims, label;
+    if (shape === 'circle'){ dims = {diameter:a}; label = `دائري Ø${a}`; }
+    else if (shape === 'square'){ dims = {side:a}; label = `مربع ${a}×${a}`; }
+    else { dims = {length:a, width:b}; label = `مستطيل ${a}×${b}`; }
+    const r = calculatePiece(shape, dims);
+    const tr = document.createElement('tr');
+    if (r.error){
+      tr.innerHTML = `<td class="txt">${label}</td><td colspan="5" style="color:var(--danger);direction:rtl;text-align:right">${r.error}</td>`;
+    } else {
+      tr.innerHTML = `
+        <td class="txt">${label}</td>
+        <td>${r.pack.count}</td>
+        <td>${fmt(r.pieceWeight,1)}</td>
+        <td>${fmt(r.costPerPiece,2)}</td>
+        <td>${fmt(r.sellingPrice,2)}</td>
+        <td><b>${fmt(r.pricePerKg,2)}</b></td>
+      `;
+    }
+    tbody.appendChild(tr);
+  });
+}
+
+function addCurrentToBatch(){
+  document.querySelector('[data-main="batch"]').click();
+  const dims = getCurrentDims();
+  let data;
+  if (STATE.shape === 'circle') data = {shape:'circle', a:dims.diameter, b:0};
+  else if (STATE.shape === 'square') data = {shape:'square', a:dims.side, b:0};
+  else data = {shape:'rectangle', a:dims.length, b:dims.width};
+  addSizeRow(data);
+  toast('✓ أُضيف للجدول');
+}
+
+// ============================================
+// ORDER TAB
+// ============================================
+function addOrderRow(data){
+  const list = $('orderList');
+  const d = data || {shape:'circle', a:25, b:0, qty:100, unit:'pcs'};
+  const row = document.createElement('div');
+  row.className = 'size-item order-row';
+  row.innerHTML = `
+    <select class="ms-shape">
+      <option value="circle" ${d.shape==='circle'?'selected':''}>دائرية</option>
+      <option value="square" ${d.shape==='square'?'selected':''}>مربعة</option>
+      <option value="rectangle" ${d.shape==='rectangle'?'selected':''}>مستطيلة</option>
+    </select>
+    <input type="number" class="ms-a" placeholder="مقاس" value="${d.a}" step="1">
+    <input type="number" class="ms-b" placeholder="عرض" value="${d.b||''}" step="1" ${d.shape!=='rectangle'?'style="visibility:hidden" data-hidden="true"':''}>
+    <input type="number" class="ms-qty" placeholder="كمية" value="${d.qty}" step="${d.unit==='kg'?'0.5':'10'}" min="0.1">
+    <select class="ms-unit">
+      <option value="pcs" ${d.unit==='pcs'?'selected':''}>بالعدد</option>
+      <option value="kg" ${d.unit==='kg'?'selected':''}>بالكيلو</option>
+    </select>
+    <button class="del" title="حذف">×</button>
+  `;
+  row.querySelector('.ms-shape').addEventListener('change', e=>{
+    const msbEl = row.querySelector('.ms-b');
+    msbEl.style.visibility = e.target.value === 'rectangle' ? 'visible' : 'hidden';
+    if (e.target.value === 'rectangle') msbEl.removeAttribute('data-hidden'); else msbEl.setAttribute('data-hidden','true');
+  });
+  row.querySelector('.ms-unit').addEventListener('change', e=>{
+    const qtyInp = row.querySelector('.ms-qty');
+    qtyInp.step = e.target.value === 'kg' ? '0.5' : '10';
+  });
+  row.querySelector('.del').addEventListener('click', ()=>row.remove());
+  list.appendChild(row);
+}
+
+function calculateOrder(){
+  const rows = document.querySelectorAll('#orderList .size-item');
+  if (rows.length === 0){ toast('أضف مقاسات وكميات','error'); return; }
+  const inp = readInputs();
+  let totalSheetsNeeded = 0;
+  let totalCost = 0, totalSelling = 0, totalProfit = 0;
+  let totalKartonKg = 0, totalSilicateKg = 0;
+  let totalFaceLayersKg = {}, totalBackLayersKg = {};
+  let totalQtyPieces = 0, totalQtyKg = 0;
+  const lines = [];
+
+  rows.forEach(row=>{
+    const shape = row.querySelector('.ms-shape').value;
+    const a = +row.querySelector('.ms-a').value || 0;
+    const b = +row.querySelector('.ms-b').value || 0;
+    const qtyInput = +row.querySelector('.ms-qty').value || 0;
+    const unit = row.querySelector('.ms-unit').value;
+    let dims, label;
+    if (shape === 'circle'){ dims = {diameter:a}; label = `Ø${a}`; }
+    else if (shape === 'square'){ dims = {side:a}; label = `${a}×${a}`; }
+    else { dims = {length:a, width:b}; label = `${a}×${b}`; }
+
+    const r = calculatePiece(shape, dims);
+    if (r.error || r.pack.count === 0){
+      lines.push({label, qty:qtyInput, unit, error:r.error});
+      return;
+    }
+
+    // Convert qty to pieces
+    let qtyPieces;
+    if (unit === 'kg'){
+      qtyPieces = Math.ceil((qtyInput * 1000) / r.pieceWeight);
+    } else {
+      qtyPieces = Math.ceil(qtyInput);
+    }
+    const qtyKg = (qtyPieces * r.pieceWeight) / 1000;
+    
+    const sheets = Math.ceil(qtyPieces / r.pack.count);
+    const lineCost = sheets * r.finalCostSheet;
+    const lineSelling = qtyPieces * r.sellingPrice;
+    const lineProfit = lineSelling - lineCost;
+    totalSheetsNeeded += sheets;
+    totalCost += lineCost;
+    totalSelling += lineSelling;
+    totalProfit += lineProfit;
+    totalQtyPieces += qtyPieces;
+    totalQtyKg += qtyKg;
+    totalKartonKg += sheets * inp.sheetWeightKarton / 1000;
+    totalSilicateKg += sheets * inp.silicateGrams / 1000;
+    
+    // Aggregate face/back layer materials
+    inp.face.breakdown.forEach(b => {
+      const key = `${b.label} (وجه)`;
+      totalFaceLayersKg[key] = (totalFaceLayersKg[key] || 0) + (sheets * b.weight / 1000);
+    });
+    inp.back.breakdown.forEach(b => {
+      const key = `${b.label} (ضهر)`;
+      totalBackLayersKg[key] = (totalBackLayersKg[key] || 0) + (sheets * b.weight / 1000);
+    });
+    
+    lines.push({
+      label, qty:qtyInput, unit, qtyPieces, qtyKg,
+      sheets, piecesPerSheet:r.pack.count,
+      costPerPiece:r.costPerPiece, sellingPrice:r.sellingPrice, pricePerKg: r.pricePerKg,
+      pieceWeight: r.pieceWeight,
+      lineCost, lineSelling, lineProfit
+    });
+  });
+
+  const balesNeeded = totalKartonKg / 25;
+  const allLayersHtml = [
+    ...Object.entries(totalFaceLayersKg).map(([k,v]) => 
+      `<div class="stat"><div class="stat-label">${k}</div><div class="stat-value">${fmt(v,2)}<span class="stat-unit">كجم</span></div></div>`
+    ),
+    ...Object.entries(totalBackLayersKg).map(([k,v]) => 
+      `<div class="stat"><div class="stat-label">${k}</div><div class="stat-value">${fmt(v,2)}<span class="stat-unit">كجم</span></div></div>`
+    )
+  ].join('');
+
+  $('orderSummary').innerHTML = `
+    <div class="table-wrap" style="margin-top:14px">
+      <table>
+        <thead>
+          <tr><th>المقاس</th><th>الكمية</th><th>عدد قطع</th><th>وزن إجمالي</th><th>قطع/فرخ</th><th>أفرخ</th><th>تكلفة</th><th>إيراد</th><th>ربح</th></tr>
+        </thead>
+        <tbody>
+          ${lines.map(l=> l.error ?
+            `<tr><td class="txt">${l.label}</td><td>${l.qty} ${l.unit==='kg'?'كجم':'قطعة'}</td><td colspan="7" style="color:var(--danger)">${l.error}</td></tr>` :
+            `<tr>
+              <td class="txt">${l.label}</td>
+              <td>${fmt(l.qty, l.unit==='kg'?2:0)} ${l.unit==='kg'?'كجم':'قطعة'}</td>
+              <td>${l.qtyPieces}</td>
+              <td>${fmt(l.qtyKg,2)} كجم</td>
+              <td>${l.piecesPerSheet}</td>
+              <td>${l.sheets}</td>
+              <td>${fmt(l.lineCost,2)}</td>
+              <td>${fmt(l.lineSelling,2)}</td>
+              <td><b>${fmt(l.lineProfit,2)}</b></td>
+            </tr>`).join('')}
+        </tbody>
+        <tfoot>
+          <tr>
+            <td class="txt">الإجمالي</td>
+            <td>—</td>
+            <td>${totalQtyPieces}</td>
+            <td>${fmt(totalQtyKg,2)} كجم</td>
+            <td>—</td>
+            <td>${totalSheetsNeeded}</td>
+            <td>${fmt(totalCost,2)}</td>
+            <td>${fmt(totalSelling,2)}</td>
+            <td>${fmt(totalProfit,2)}</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+    <div class="order-summary">
+      <h3>📦 ملخص احتياجات الطلبية</h3>
+      <div class="result-grid">
+        <div class="stat dark"><div class="stat-label">إجمالي أفرخ</div><div class="stat-value">${totalSheetsNeeded}</div></div>
+        <div class="stat"><div class="stat-label">كارتون إجمالي</div><div class="stat-value">${fmt(totalKartonKg,2)}<span class="stat-unit">كجم</span></div></div>
+        <div class="stat"><div class="stat-label">بالات (نمرة ${inp.kartonNumber})</div><div class="stat-value">${fmt(balesNeeded,2)}</div></div>
+        ${allLayersHtml}
+        <div class="stat"><div class="stat-label">سيليكات</div><div class="stat-value">${fmt(totalSilicateKg,2)}<span class="stat-unit">كجم</span></div></div>
+        <div class="stat gold"><div class="stat-label">إجمالي التكلفة</div><div class="stat-value">${fmt(totalCost,0)}<span class="stat-unit">ج</span></div></div>
+        <div class="stat green"><div class="stat-label">إجمالي الربح</div><div class="stat-value">${fmt(totalProfit,0)}<span class="stat-unit">ج</span></div></div>
+      </div>
+    </div>
+  `;
+}
+
+// ============================================
+// RECIPES (templates)
+// ============================================
+async function saveAsRecipe(){
+  const name = prompt('اسم الوصفة (مثلاً: قاعدة فاخرة وش ميتاليز/ضهر مطبوع):');
+  if (!name) return;
+  const settings = readSettingsObject();
+  const recipe = {id: Date.now(), name, settings, createdAt: new Date().toISOString()};
+  STATE.recipes.push(recipe);
+  await saveRecipes();
+  renderRecipes();
+  toast('✓ تم حفظ الوصفة');
+}
+
+function readSettingsObject(){
+  const obj = {};
+  ['sheetWidth','sheetHeight','kartonNumber','balePrice',
+   'lasqFacePrice','lasqBackPrice',
+   'bosmaPrice','cuttingPrice','machinePctOfFace','silicateGrams','silicatePrice',
+   'wastePrice','overheadPct','profitPct'].forEach(id=>{
+    const el = $(id);
+    if (el) obj[id] = el.value;
+  });
+  obj.faceLayers = JSON.parse(JSON.stringify(STATE.faceLayers));
+  obj.backLayers = JSON.parse(JSON.stringify(STATE.backLayers));
+  return obj;
+}
+
+function applyRecipe(recipe){
+  const s = recipe.settings;
+  // Apply standard fields first
+  Object.entries(s).forEach(([k,v])=>{
+    if (k === 'faceLayers' || k === 'backLayers') return;
+    const el = $(k);
+    if (el) el.value = v;
+  });
+  // Apply layers
+  if (Array.isArray(s.faceLayers)) STATE.faceLayers = JSON.parse(JSON.stringify(s.faceLayers));
+  if (Array.isArray(s.backLayers)) STATE.backLayers = JSON.parse(JSON.stringify(s.backLayers));
+  renderLayers('face');
+  renderLayers('back');
+  renderActive();
+  document.querySelector('[data-main="single"]').click();
+  toast(`✓ تم تطبيق وصفة: ${recipe.name}`);
+}
+
+async function deleteRecipe(id){
+  if (!confirm('حذف الوصفة؟')) return;
+  STATE.recipes = STATE.recipes.filter(r=>r.id !== id);
+  await saveRecipes();
+  renderRecipes();
+}
+
+async function saveRecipes(){
+  try {
+    if (window.storage){
+      await window.storage.set('cake_recipes', JSON.stringify(STATE.recipes));
+    }
+  } catch(e){}
+}
+
+async function loadRecipes(){
+  try {
+    if (!window.storage) return;
+    const r = await window.storage.get('cake_recipes');
+    if (r && r.value){
+      STATE.recipes = JSON.parse(r.value);
+    }
+  } catch(e){}
+  renderRecipes();
+}
+
+function renderRecipes(){
+  $('recipeCount').textContent = STATE.recipes.length;
+  const list = $('recipeList');
+  if (STATE.recipes.length === 0){
+    list.innerHTML = `<p style="color:var(--muted);text-align:center;padding:30px;grid-column:1/-1">— لا توجد وصفات محفوظة —<br>اضبط الإعدادات في اليسار، ثم اضغط <b>"⭐ حفظ كوصفة"</b></p>`;
+    return;
+  }
+  list.innerHTML = STATE.recipes.map(rec=>{
+    const faceLabels = (rec.settings.faceLayers || []).map(l => materialLabel(l.type)).join(' + ') || 'بدون';
+    const backLabels = (rec.settings.backLayers || []).map(l => materialLabel(l.type)).join(' + ') || 'بدون';
+    return `
+    <div class="recipe-card">
+      <h4>${rec.name}</h4>
+      <p>وجه: <b>${faceLabels}</b></p>
+      <p>ضهر: <b>${backLabels}</b></p>
+      <p>كارتون نمرة <b>${rec.settings.kartonNumber}</b> · ربح <b>${rec.settings.profitPct}%</b></p>
+      <div class="recipe-actions">
+        <button class="btn btn-gold btn-sm" onclick='applyRecipe(${JSON.stringify(rec).replace(/'/g,"&#39;")})'>تطبيق</button>
+        <button class="btn btn-ghost btn-sm" onclick="deleteRecipe(${rec.id})">حذف</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ============================================
+// SAVE / LOAD SETTINGS
+// ============================================
+async function loadSettings(){
+  try {
+    if (!window.storage) return;
+    const r = await window.storage.get('cake_calc_settings_v3');
+    if (r && r.value){
+      const data = JSON.parse(r.value);
+      Object.entries(data).forEach(([k,v])=>{
+        if (k === 'faceLayers' || k === 'backLayers') return;
+        const el = $(k);
+        if (el) el.value = v;
+      });
+      if (Array.isArray(data.faceLayers)) STATE.faceLayers = JSON.parse(JSON.stringify(data.faceLayers));
+      if (Array.isArray(data.backLayers)) STATE.backLayers = JSON.parse(JSON.stringify(data.backLayers));
+      renderLayers('face');
+      renderLayers('back');
+    }
+  } catch(e){}
+}
+
+async function saveSettings(){
+  try {
+    const data = readSettingsObject();
+    if (window.storage){
+      await window.storage.set('cake_calc_settings_v3', JSON.stringify(data));
+    }
+    toast('✓ تم الحفظ');
+  } catch(e){ toast('تعذر الحفظ', 'error'); }
+}
+
+function resetSettings(){
+  if (!confirm('هتفقد الإعدادات الحالية. متأكد؟')) return;
+  const defaults = {
+    sheetWidth:70, sheetHeight:100,
+    kartonNumber:25, balePrice:500,
+    lasqFacePrice:0.5, lasqBackPrice:0.4,
+    bosmaPrice:0, cuttingPrice:0.4, machinePctOfFace:30,
+    silicateGrams:100, silicatePrice:15, wastePrice:5,
+    overheadPct:15, profitPct:25
+  };
+  Object.entries(defaults).forEach(([k,v])=>{ if($(k)) $(k).value = v; });
+  // Reset layers to defaults
+  STATE.faceLayers = [];
+  STATE.backLayers = [];
+  addLayer('face', {type:'metalize'});
+  addLayer('back', {type:'paper_plain'});
+  renderActive();
+  toast('تم الاسترجاع');
+}
+
+function exportSingleAsImage(){
+  toast('للتصدير: استخدم زر الطباعة وحفظ كـ PDF');
+}
+
+// ============================================
+// EVENTS
+// ============================================
+document.querySelectorAll('.shape-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.shape-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    STATE.shape = btn.dataset.shape;
+    $('dimsCircle').style.display = STATE.shape === 'circle' ? 'grid' : 'none';
+    $('dimsSquare').style.display = STATE.shape === 'square' ? 'grid' : 'none';
+    $('dimsRect').style.display = STATE.shape === 'rectangle' ? 'grid' : 'none';
+    renderSingle();
+  });
+});
+
+document.querySelectorAll('.main-tab').forEach(tab=>{
+  tab.addEventListener('click', ()=>{
+    document.querySelectorAll('.main-tab').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    document.querySelectorAll('.main-section').forEach(c=>c.style.display='none');
+    document.querySelector(`[data-section="${tab.dataset.main}"]`).style.display='block';
+  });
+});
+
+$('faceMaterial')?.addEventListener('change', ()=>{ renderActive(); });
+$('backMaterial')?.addEventListener('change', ()=>{ renderActive(); });
+
+// All static inputs
+function attachInputListeners(){
+  document.querySelectorAll('aside input, aside select, .calc-shape + * input, .calc-shape ~ * input').forEach(el=>{
+    el.addEventListener('input', renderActive);
+    el.addEventListener('change', renderActive);
+  });
+}
+
+function renderActive(){
+  // current main tab
+  const active = document.querySelector('.main-tab.active')?.dataset.main;
+  if (active === 'single' || !active) renderSingle();
+}
+
+// ============================================
+// INIT
+// ============================================
+(async function init(){
+  // Add default layers
+  STATE.faceLayers = [];
+  STATE.backLayers = [];
+  
+  await loadSettings();
+  await loadRecipes();
+  
+  // If no layers loaded, add defaults
+  if (STATE.faceLayers.length === 0){
+    addLayer('face', {type:'metalize'});
+  } else {
+    renderLayers('face');
+  }
+  if (STATE.backLayers.length === 0){
+    addLayer('back', {type:'paper_plain'});
+  } else {
+    renderLayers('back');
+  }
+  
+  attachInputListeners();
+  ['diameter','sqSide','rectL','rectW','sheetWidth','sheetHeight'].forEach(id=>{
+    const el = $(id);
+    if (el){ el.addEventListener('input', renderActive); }
+  });
+  renderSingle();
+
+  if ($('multiPiecesList').children.length === 0){
+    addMultiPiece({shape:'circle', a:25, qty:'auto', label:'دائري 25'});
+    addMultiPiece({shape:'circle', a:18, qty:'auto', label:'دائري 18'});
+  }
+  if ($('orderList').children.length === 0){
+    addOrderRow({shape:'circle', a:25, qty:500, unit:'pcs'});
+  }
+})();
+</script>
+
+</body>
+</html>
